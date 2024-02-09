@@ -1,4 +1,12 @@
 import { onRequest } from 'firebase-functions/v2/https';
+const { initializeApp } = require('firebase-admin/app');
+const { getFirestore } = require('firebase-admin/firestore');
+
+initializeApp();
+
+const db = getFirestore();
+
+
 
 import express, { Express, Request, Response } from "express";
 const app: Express = express();
@@ -15,6 +23,16 @@ const app: Express = express();
 app.get('/', (_req: Request, res: Response) => {
   return res.send('Hello World!');
 });
+app.get('/addData', async (_req: Request, res: Response) => {
 
+  const docRef = db.collection('users').doc('alovelace');
+
+  await docRef.set({
+    first: 'Ada',
+    last: 'Lovelace',
+    born: 1815
+  });
+  return res.send("Ada Lovelace born 1815 was added to the database!");
+});
 // Expose Express API as a single Cloud Function:
 exports.widgets = onRequest(app);
