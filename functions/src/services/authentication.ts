@@ -6,15 +6,13 @@ import * as crypto from 'crypto';
 // Defining algorithm
 const algorithm = 'aes-256-cbc';
 
-// Defining key
-const key = crypto.randomBytes(32);
-
-// Defining iv
-const iv = crypto.randomBytes(16);
-
 // An encrypt function
 export function encrypt(text: any) {
+  const salt = crypto.randomBytes(32);
+  const key = crypto.scryptSync(process.env.ENCRYPTION_KEY as string || "secret", salt, 32);
 
+  // Defining iv
+  const iv = crypto.randomBytes(16);
   // Creating Cipheriv with its parameter
   let cipher =
     crypto.createCipheriv(algorithm, Buffer.from(key), iv);
@@ -28,12 +26,14 @@ export function encrypt(text: any) {
   // Returning iv and encrypted data
   return {
     iv: iv.toString('hex'),
+    salt: salt.toString('hex'),
     encryptedData: encrypted.toString('hex')
   };
 }
 
 // A decrypt function
 export function decrypt(text: any) {
+  const key = crypto.scryptSync(process.env.ENCRYPTION_KEY as string || "secret", Buffer.from(text.salt, 'hex'), 32);
 
   let iv = Buffer.from(text.iv, 'hex');
   let encryptedText =
@@ -52,23 +52,15 @@ export function decrypt(text: any) {
 }
 
 export async function verifyToken(req: Request, res: Response, next: NextFunction) {
-  try {
-    const authHeader = req.headers['authorization']
-    const token = authHeader && authHeader.split(' ')[1]
-    const secret = process.env.SECRET as string || "secret";
-    var decoded = jwt.verify(token || "", secret);
-
-    const users = db.collection("users");
-
-    const snapshot = await users.where("id", "==", decrypt((decoded as JwtPayload).id)).get();
-
-    if (!snapshot.empty) {
-      next();
-    }
+  var id = await getTokenId(req);
+  const user = db.collection("users").doc(id);
+  if (user != null) {
+    console.log("verified user")
+    next();
+  } else {
     return res.status(404).json({ error: "Unauthorized" });
-  } catch (err) {
-    return res.status(405).json({ error: "Invalid token" });
   }
+  return;
 }
 
 
@@ -78,9 +70,9 @@ export async function getTokenId(req: Request) {
     const token = authHeader && authHeader.split(' ')[1]
     const secret = process.env.SECRET as string || "secret";
     var decoded = jwt.verify(token || "", secret);
-    return decoded.toString() == "" ? null : decrypt((decoded as JwtPayload).id);
+    return decrypt((decoded as JwtPayload).id) || "";
   } catch (err) {
-    return null;
+    return "";
   }
 }
 
