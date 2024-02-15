@@ -79,11 +79,36 @@ app.post('/create', async (req: Request, res: Response) => {
 app.put('/update', verifyToken, async (req: Request, res: Response) => {
   const users = db.collection("users");
   var id = await getTokenId(req);
+  if (req.body.password) {
+    return res.status(303).json({ error: "Password cannot be changed" });
+  }
   if (id != "") {
     users.doc(id).update(req.body);
     return res.status(200).json({ message: "User updated" });
   }
   return res.status(400).json({ error: "failed to find user" });
+});
+
+app.post('/changePassword', verifyToken, async (req: Request, res: Response) => {
+  const users = db.collection("users");
+  if (req.body.organizationId === process.env.ORGANIZATION_ID) {
+    if (req.body.password && req.body.newPassword) {
+      var id = await getTokenId(req);
+      var user = users.doc(id);
+      var data = (await user.get()).data();
+      if (!data) {
+        return res.status(300).json({ error: "User not found" });
+      }
+      if (decrypt(data.password) === req.body.password) {
+        user.update({ password: encrypt(req.body.newPassword) });
+      } else {
+        return res.status(302).json({ error: "Wrong password" });
+      }
+      return res.status(200).json({ message: "Password changed" });
+    }
+    return res.status(303).json({ error: "Invalid body" });
+  }
+  return res.status(300).json({ error: "Invalid organization" });
 });
 
 export default app;
