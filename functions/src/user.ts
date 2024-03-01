@@ -17,7 +17,7 @@ app.get('/', async (_req: Request, res: Response) => {
   )
 });
 
-app.get('/login', async (req: Request, res: Response) => {
+app.post('/login', async (req: Request, res: Response) => {
   if (req.body && req.body.username && req.body.password) {
     const users = db.collection("users");
     const snapshot = await users.where("username", "==", req.body.username).get();
@@ -89,7 +89,7 @@ app.put('/update', verifyToken, async (req: Request, res: Response) => {
   return res.status(400).json({ error: "failed to find user" });
 });
 
-app.post('/changePassword', verifyToken, async (req: Request, res: Response) => {
+app.put('/changePassword', verifyToken, async (req: Request, res: Response) => {
   const users = db.collection("users");
   if (req.body.organizationId === process.env.ORGANIZATION_ID) {
     if (req.body.password && req.body.newPassword) {
