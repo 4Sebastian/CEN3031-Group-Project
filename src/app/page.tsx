@@ -12,15 +12,15 @@ export default function Home() {
   return (
     <Box sx={{ width: '100dvw', height: '100dvh', backgroundImage: "url('components/Ice_Hockey.jpeg')", backgroundSize: 'cover' }}>
 
-      <Stack direction="column" justifyContent="space-between" alignItems="flex-end" sx={{ width: 1, padding: 3, height: 1 }}>
+      <Stack direction="column" sx={{ width: 1, height: 1, justifyContent: 'flex-start' }}>
         {/* Title Stack */}
-        <Stack direction="row" justifyContent="space-between" sx={{ width: 1, height: 'min-content', marginBottom: 2 }}>
+        <Stack direction="row" sx={{ height: 'min-content', justifyContent: 'space-between', padding: 3 }}>
           <Title />
           <UserIcon />
         </Stack>
 
         {/* FriendsList Stack */}
-        <Stack direction="row" justifyContent="space-between" sx={{ width: 1, height: 1 }}>
+        <Stack direction="row" sx={{ height: 1, justifyContent: 'space-between', padding: 3 }}>
           <FriendsList />
           <GroupsList />
           <PuckDial />
