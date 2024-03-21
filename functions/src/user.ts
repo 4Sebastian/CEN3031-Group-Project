@@ -1,4 +1,5 @@
 import express, { Express, Request, Response } from "express";
+import { v4 as uuidv4 } from 'uuid'
 import db from './services/database';
 import jwt from 'jsonwebtoken';
 import { encrypt, decrypt, verifyToken, getTokenId } from './services/authentication';
@@ -67,8 +68,11 @@ app.post('/create', async (req: Request, res: Response) => {
       if (!(await users.where("username", "==", user.username).get()).empty) {
         return res.status(305).json({ error: "Username already exists" });
       }
-      user.password = encrypt(user.password);
-      users.add(user)
+      var dbuser = { ...user } as Omit<typeof UserFields, "password"> & { password: any };
+      dbuser.password = encrypt(user.password);
+      dbuser.friendcode = uuidv4();
+
+      users.add(dbuser)
       return res.status(200).json({ message: "User created" });
     }
     return res.status(303).json({ error: "Invalid body" });
