@@ -1,32 +1,27 @@
 import { Request } from "express";
-interface UserFieldType {
-  [key: string]: any; // All fields are strings
-}
+import { getRecord, UserFieldType, UserRequireType, validateRecord } from "../services/utils";
 
 export var UserFields: UserFieldType = {
   username: 'string',
   email: 'string',
   password: 'string',
-  // Add more fields here
+  name: 'string',
+  friendcode: 'string',
+  profilePic: 'string',
+  skilllevel: 'string',
+  homerink: 'string'
 };
 
-export function getUser(body: any): (typeof UserFields) {
-  var info: typeof UserFields = {};
-  for (const field in UserFields) {
-    info[field] = body[field];
-  }
-  return info;
+export var requiredUserFields: UserRequireType = {
+  username: true,
+  email: true,
+  password: true,
 }
 
-export function validateUserCreationRequestBody(req: Request<any, any, UserFieldType>): boolean {
-  const body = req.body;
-
-  for (const field in UserFields) {
-    if (typeof body[field] !== UserFields[field]) {
-      return false;
-    }
-  }
-
-  return true;
+export function getUser(body: any) {
+  return getRecord(body, UserFields)
 }
 
+export function validateUserCreationRequestBody(req: Request<any, any, UserFieldType>) {
+  return validateRecord(req, UserFields, requiredUserFields)
+}
