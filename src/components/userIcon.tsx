@@ -4,7 +4,7 @@ export default function UserIcon() {
     return (
         <Avatar
           alt="User Profile"
-          src={"url('White_British_Shorthair.png')"} // Pass the URL of the user's profile image
+          src={"components/White_British_Shorthair.png"} // Pass the URL of the user's profile image
           sx={{
             width: 60, // Set the desired size
             height: 60, // Set the desired size
