@@ -1,10 +1,19 @@
+import { getInfo, isLoggedIn } from '@/services/userHandling';
 import { Avatar, Box, Stack } from '@mui/material'
-import { MouseEventHandler } from 'react';
+import { useRouter } from 'next/router';
+import { MouseEventHandler, useEffect, useState } from 'react';
 
-export default function UserIcon(props: {onClick: () => void, userName: string}) {
+export default function UserIcon(props: {userName: string ; onclick: any}) {
   // Extracting the first letter of the userName
-  console.log(props.userName);
-  const letter = props.userName.charAt(0).toUpperCase();
+  const [userImage, setUserImage] = useState(props.userName);
+  let [loggedIn, setLoggedIn] = useState(false)
+
+  useEffect(() => {
+    // Update buttonString based on loggedIn prop
+    const letter = props.userName?.charAt(0).toUpperCase();
+    console.log(props.userName)
+    setUserImage(letter)
+  },[props.userName]);
 
   return (
       <Avatar
@@ -20,9 +29,9 @@ export default function UserIcon(props: {onClick: () => void, userName: string})
               transform: 'scale(1.2)',
             },
         }}
-        onClick={props.onClick}
+        onClick={props.onclick}
       >
-          {letter}
+          {userImage}
       </Avatar>
   );
 }

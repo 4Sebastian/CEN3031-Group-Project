@@ -1,4 +1,7 @@
-import { Box, Stack, Typography } from '@mui/material';
+import { getFriends } from '@/services/friendHandling';
+import { Box, Button, Stack, Typography } from '@mui/material';
+import { useState, useEffect } from 'react';
+import { FriendFields } from '../../functions/src/components/friends';
 
 const friendsData = [
   'Friend 1',
@@ -7,7 +10,27 @@ const friendsData = [
   // Add more friends as needed
 ];
 
+
+
 export default function FriendsList() {
+
+  const [friendsList, setFriendsList] = useState<any[]>([]);
+
+  useEffect(() => {
+    console.log('printing friends')
+    const f = async () => {
+      var something = await getFriends();
+      console.log(something);
+      if (something.status == 200) {
+        
+        setFriendsList(something.data);
+        console.log('a friendly success')
+      }
+    }
+    f();
+  }, [friendsList]);
+  
+
   return (
     <Box sx={{
       width: 0.3,
@@ -24,23 +47,29 @@ export default function FriendsList() {
         <Typography variant="h5" color="black" sx={{ marginBottom: 2 }}>
           Friends List
         </Typography>
-        {friendsData.map((friend, index) => (
+        {friendsList.map((friend, index) => (
           <Box key={index} sx={{
             backgroundColor: 'lightblue',
             borderRadius: '8px',
-            width: '90%', // Adjust the width as needed
+            width: '22vw', // Adjust the width as needed
             padding: '12px',
             marginBottom: '16px', // Adjust the space between friends
             transition: 'transform 0.3s ease',
             '&:hover': {
               transform: 'scale(1.1)',
             },
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
           }}
           >
-            <Typography color="black">{friend}</Typography>
+            <Typography color="black">{friend.username}</Typography>
+            <Button variant="contained" color="primary">
+              View
+            </Button>
           </Box>
         ))}
       </Stack>
     </Box>
   );
-}
+};

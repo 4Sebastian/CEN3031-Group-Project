@@ -9,8 +9,11 @@ export const LoginPage = () => {
   // State variables to store username and password
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  
   const router = useRouter();
+
+  function handleClick(){
+    router.push('/createUser/create')
+  }
 
   // Function to handle form submission
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -51,6 +54,9 @@ export const LoginPage = () => {
         />
         <Button type="submit" variant="contained" color="primary" fullWidth sx={{ mt: 2 }}>
           Login
+        </Button>
+        <Button variant="contained" color="primary" fullWidth sx={{ mt: 2 }} onClick ={handleClick}>
+          New user? Create an account!
         </Button>
       </form>
     </Container>

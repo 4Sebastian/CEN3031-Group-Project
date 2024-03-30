@@ -15,7 +15,7 @@ import CreateUserPage from '@/pages/createUser/[createUser]';
 import DeleteUserPage from '@/components/user/delete';
 import { LoginPage } from '@/components/user/login';
 import LogoutPage from '@/components/user/logout';
-import { getInfo } from "@/services/userHandling";
+import { getInfo, isLoggedIn } from "@/services/userHandling";
 import { useState, useEffect } from "react";
 
 import "./globals.css"
@@ -34,37 +34,45 @@ export default function Home() {
   const [userName, setUserName] = useState(""); 
   const [activeComponent, setActiveComponent] = useState('home');
   let [userCreated, setUserCreated] = useState(false);
+  let [shouldCheckUser, setCheckUser] = useState(false);
+
+  function checkUser(){
+    setCheckUser(!shouldCheckUser);
+  }
+
+  const handleUserIconClick = () => {
+    console.log('Clicked icon')
+    if(userCreated){
+      console.log('User is created')
+      router.push('/users/meow');
+    }
+  };
 
   useEffect(() => {
     // Fetch user information when the component mounts
     async function fetchUserInfo() {
       try {
-        const response = await getInfo();
-        if (response.status === 200) {
-          console.log(response.data)
-          setUserName(response.data.username);
-          setUserCreated(true);
-        } else {
-          setUserCreated(false);
-          console.error('Failed to fetch user information');
+        if(isLoggedIn()){
+          const response = await getInfo();
+          if (response.status === 200) {
+            setUserName(response.data.username);
+            setUserCreated(true);
+          } else {
+            setUserCreated(false);
+            console.error('Failed to fetch user information');
+          }
+        }
+        else{
+          console.log('logged out meow')
+          setUserName('')
+          setUserCreated(false)
         }
       } catch (error) {
         console.error('Error while fetching user information:', error);
       }
     }
     fetchUserInfo(); // Call the fetchUserInfo function
-  }, []); 
-
-  const handleUserIconClick = () => {
-    if(userCreated){
-      console.log('User is created')
-      router.push('/users/meow');
-    }
-    else{
-      setActiveComponent('createUser')
-    }
-    
-  };
+  }, [shouldCheckUser]); 
 
   const renderActiveComponent = () => {
     switch (activeComponent) {
@@ -129,10 +137,12 @@ export default function Home() {
             {/* Content */}
             <Stack direction="column" sx={{ width: '100%', height: '100%', justifyContent: 'flex-start', position: 'relative', zIndex: 1 }}>
               {/* Title Stack */}
-              <Stack direction="row" sx={{ height: 'min-content', justifyContent: 'space-between', padding: 3, position: 'relative', zIndex: 2 }}>
+              <Stack direction="row" alignItems="center" sx={{ height: 'min-content', justifyContent: 'space-between', padding: 3, position: 'relative', zIndex: 2 }}>
                 <Title />
-                <LogButton loggedIn  = {userCreated} />
-                <UserIcon onClick={handleUserIconClick} userName={userName} />
+                <Stack direction="row" spacing={2}> {/* Adjust the spacing between LogButton and UserIcon */}
+                  <LogButton loggedIn={userCreated} checkUser={checkUser} />
+                  <UserIcon userName={userName} onclick={handleUserIconClick} />
+                </Stack>
               </Stack>
       
               {/* FriendsList Stack */}

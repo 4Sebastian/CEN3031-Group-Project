@@ -28,6 +28,10 @@ export function setBearerToken(token: string) {
   localStorage.setItem('userToken', token);
 }
 
+export function getBearerToken(){
+  return localStorage.getItem('userToken')
+}
+
 /**
  * Makes an HTTP request.
  * @param url - The URL to make the request to.

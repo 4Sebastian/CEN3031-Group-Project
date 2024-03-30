@@ -2,9 +2,10 @@
 import { useState } from 'react';
 import { Container, Typography, TextField, Button } from '@mui/material';
 import { create } from '@/services/userHandling';
+import { useRouter } from 'next/router';
 
 const CreateUserPage = () => {
-
+  const router = useRouter();
   // State variables to store form data
   const [formData, setFormData] = useState({
     organizationId: '',
@@ -20,7 +21,9 @@ const CreateUserPage = () => {
     console.log('Form data:', formData);
     var output = await create(formData);
     console.log(output.data)
-    // Redirect to dashboard page after successful user creation
+    if(output.status == 200){
+      router.push('/')
+    }
   };
 
   // Function to handle input changes
