@@ -4,7 +4,7 @@ import { Request } from "express";
 export var EventFields: UserFieldType = {
   id: 'string',
   creator: 'string',
-  datetime: 'Date',
+  datetime: 'string',
   recommendedskilllevel: 'string',
   location: 'string',
   visibility: 'string'
