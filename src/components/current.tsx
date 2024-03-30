@@ -7,15 +7,14 @@ const eventsData = [
   'Event 2A',
   'Event 2B',
   'Event 2C',
-  // Add more events as needed
 ];
 
 export default function CurrentGroupsList() {
   return (
     <Box sx={{
-      width: 0.65,
+      width: 0.33,
       height: 1, // Adjust the height as needed
-      backgroundColor: 'rgba(128, 128, 128, 0)',
+      backgroundColor: 'rgba(128, 128, 128, 0.75)',
       borderRadius: '15px',
       transition: 'box-shadow 0.1s ease',
       '&:hover': {

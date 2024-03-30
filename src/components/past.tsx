@@ -1,4 +1,5 @@
 import { Box, Stack, Typography, Button } from '@mui/material';
+import { relative } from 'path';
 
 const eventsData = [
   'Event 1A',
@@ -13,9 +14,9 @@ const eventsData = [
 export default function PastGroupsList() {
   return (
     <Box sx={{
-      width: 0.65,
+      width: 0.33,
       height: 1, // Adjust the height as needed
-      backgroundColor: 'rgba(128, 128, 128, 0)',
+      backgroundColor: 'rgba(128, 128, 128, 0.75)',
       borderRadius: '15px',
       transition: 'box-shadow 0.1s ease',
       '&:hover': {

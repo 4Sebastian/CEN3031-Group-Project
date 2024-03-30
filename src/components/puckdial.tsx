@@ -6,6 +6,7 @@ import PrintIcon from '@mui/icons-material/Print';
 import EventIcon from '@mui/icons-material/Event';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import SportsHockeyIcon from '@mui/icons-material/SportsHockey';
+import { useRouter } from 'next/navigation';
 
 // Your image URLs
 const customIconUrl = "components/hockey-puck.png";
@@ -19,6 +20,13 @@ const actions = [
 ];
 
 export default function PuckDial() {
+  const router = useRouter(); 
+
+  const handleActionClick = (actionName: string) => {
+    if (actionName === 'View Profile') {
+      router.push('/users/meow'); 
+    }
+  };
   return (
     <SpeedDial
       ariaLabel="SpeedDial basic example"
@@ -33,6 +41,7 @@ export default function PuckDial() {
           key={action.name}
           icon={action.icon}
           tooltipTitle={action.name}
+          onClick={() => handleActionClick(action.name)}
         />
       ))}
     </SpeedDial>
