@@ -3,20 +3,12 @@ import { Box, Button, Stack, Typography } from '@mui/material';
 import { useState, useEffect } from 'react';
 import { FriendFields } from '../../functions/src/components/friends';
 
-const friendsData = [
-  'Friend 1',
-  'Friend 2',
-  'Friend 3',
-  // Add more friends as needed
-];
-
-
-
-export default function FriendsList() {
-
+export default function FriendsList(props : {checkUser: Function}) {
   const [friendsList, setFriendsList] = useState<any[]>([]);
+  let [loggedIn, setLogged] = useState<boolean>(false)
 
   useEffect(() => {
+    props.checkUser()
     console.log('printing friends')
     const f = async () => {
       var something = await getFriends();
@@ -28,8 +20,7 @@ export default function FriendsList() {
       }
     }
     f();
-  }, [friendsList]);
-  
+  }, []);
 
   return (
     <Box sx={{
@@ -69,6 +60,9 @@ export default function FriendsList() {
             </Button>
           </Box>
         ))}
+        <Button variant="contained" color="primary">
+            Add Friend
+        </Button>
       </Stack>
     </Box>
   );

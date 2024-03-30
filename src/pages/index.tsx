@@ -147,7 +147,7 @@ export default function Home() {
       
               {/* FriendsList Stack */}
               <Stack direction="row" sx={{ height: 1, justifyContent: 'space-between', padding: 3, position: 'relative', zIndex: 2 }}>
-                <FriendsList />
+                <FriendsList checkUser={checkUser} />
                 <GroupsList />
                 <PuckDial />
               </Stack>
