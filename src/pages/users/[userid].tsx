@@ -40,8 +40,6 @@ const UserPage = () => {
   const handleUserIconClick = () => {
       console.log('thing')
       router.push('/');
-
-    
   };
 
   useEffect(() => {
