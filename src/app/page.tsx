@@ -1,4 +1,9 @@
 "use client"
+import CreateEventPage from '@/components/event/createEvent';
+import PublicEventListPage from '@/components/event/getPublicEvents';
+import AddFriendPage from '@/components/friend/addFriend';
+import FriendsListPage from '@/components/friend/getFriends';
+import RemoveFriendPage from '@/components/friend/removeFriend';
 import ChangePasswordPage from '@/components/user/changePassword';
 import CreateUserPage from '@/components/user/create';
 import DeleteUserPage from '@/components/user/delete';
@@ -21,6 +26,11 @@ export default function Home() {
         <DeleteUserPage />
         <LogoutPage />
         <ChangePasswordPage />
+        <FriendsListPage />
+        <AddFriendPage />
+        <RemoveFriendPage />
+        <CreateEventPage />
+        <PublicEventListPage />
       </Stack>
     </ThemeProvider>
   );

@@ -1,6 +1,5 @@
 import express, { Express, Request, Response } from "express";
 import { verifyToken, getTokenId } from "./services/authentication";
-//import { getTokenId, verifyToken } from "./services/authentication";
 import db from './services/database';
 
 const app: Express = express();
@@ -21,12 +20,22 @@ app.get('/list', verifyToken, async (req: Request, res: Response) => {
   var friends = db.collection("friends");
   var id = await getTokenId(req);
   var user = await users.doc(id).get();
-  if (!user.exists) {
+  if (user.exists) {
     var friendsList = await friends.where("firstuser", "==", id).get();
-    var usersList = await users.where("id", "in", friendsList.docs.map(d => d.data().seconduser)).get();
-    return res.status(200).json(usersList.docs);
+    console.log("found friends: " + friendsList.size);
+    if (!friendsList.empty) {
+      var usersList = await users.where("__name__", "in", friendsList.docs.map(d => d.get("seconduser"))).get();
+      console.log(friendsList.docs.map(d => d.get("seconduser")));
+
+      return res.status(200).json(usersList.docs.map(d => {
+        var dbuser = d.data();
+        delete dbuser.password;
+        return dbuser;
+      }));
+    }
+    return res.status(200).json([]);
   }
-  return res.status(300).json({ message: "Not authorized" });
+  return res.status(404).json({ message: "Not authorized" });
 });
 
 app.post('/add', verifyToken, async (req: Request, res: Response) => {
@@ -34,17 +43,21 @@ app.post('/add', verifyToken, async (req: Request, res: Response) => {
   var friends = db.collection("friends");
   var id = await getTokenId(req);
   var user = await users.doc(id).get();
-  if (!user.exists) {
-    var friendcode = req.body.friendcode;
-    var otherUser = await users.where("friendcode", "==", friendcode).limit(1).get();
+  if (user.exists) {
+    var friendcode: string = req.body.friendcode;
+    var otherUser = await users.where("friendcode", "==", friendcode?.trim()).limit(1).get();
     if (!otherUser.empty) {
-      friends.add({ firstuser: id, seconduser: otherUser.docs[0].id });
-      friends.add({ firstuser: otherUser.docs[0].id, seconduser: id });
-      return res.status(200).json({ success: true });
+      var potentialFriend = await friends.where("firstuser", "==", otherUser.docs[0].id).where("seconduser", "==", id).limit(1).get();
+      if (potentialFriend.empty) {
+        friends.add({ firstuser: id, seconduser: otherUser.docs[0].id });
+        friends.add({ firstuser: otherUser.docs[0].id, seconduser: id });
+        return res.status(200).json({ success: true });
+      }
+      return res.status(303).json({ error: "Already friends" });
     }
     return res.status(303).json({ error: "User not found" });
   }
-  return res.status(300).json({ message: "Not authorized" });
+  return res.status(404).json({ message: "Not authorized" });
 });
 
 app.delete('/remove', verifyToken, async (req: Request, res: Response) => {
@@ -52,9 +65,10 @@ app.delete('/remove', verifyToken, async (req: Request, res: Response) => {
   var friends = db.collection("friends");
   var id = await getTokenId(req);
   var user = await users.doc(id).get();
-  if (!user.exists) {
-    var friendcode = req.body.friendcode;
-    var otherUser = await users.where("friendcode", "==", friendcode).limit(1).get();
+  if (user.exists) {
+    var friendcode: string = req.body.friendcode;
+    console.log(friendcode);
+    var otherUser = await users.where("friendcode", "==", friendcode?.trim()).limit(1).get();
     if (!otherUser.empty) {
       friends.where("firstuser", "==", id).where("seconduser", "==", otherUser.docs[0].id).get().then((snapshot) => {
         snapshot.forEach((doc) => {
@@ -66,10 +80,11 @@ app.delete('/remove', verifyToken, async (req: Request, res: Response) => {
           doc.ref.delete();
         })
       })
+      return res.status(200).json({ success: true });
     }
     return res.status(303).json({ error: "User not found" });
   }
-  return res.status(300).json({ message: "Not authorized" });
+  return res.status(404).json({ message: "Not authorized" });
 });
 
 

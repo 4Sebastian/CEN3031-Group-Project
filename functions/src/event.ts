@@ -20,7 +20,7 @@ app.get('/', async (_req: Request, res: Response) => {
 
 app.get('/getInfo/{id}', verifyToken, async (req: Request, res: Response) => {
   const events = db.collection("events");
-  const event = await events.where("id", '==', req.params.id).limit(1).get();
+  const event = await events.where("__name__", '==', req.params.id).limit(1).get();
   if (!event.empty) {
     return res.status(200).json(event.docs[0].data());
   }
@@ -35,7 +35,7 @@ app.get('/getFriendEvents/{friendcode}', verifyToken, async (req: Request, res: 
   if (!friend.empty) {
     var allEvents: string[] = [];
     (await attends.where("user", '==', friend.docs[0].id).get()).forEach((snapshot) => { allEvents.push(snapshot.data().event) });
-    var eventsInfo = await events.where("id", 'in', allEvents).get();
+    var eventsInfo = await events.where("__name__", 'in', allEvents).get();
     return res.status(200).json(eventsInfo.docs);
   }
   return res.status(300).json({ error: "Friend not found" });
@@ -43,20 +43,25 @@ app.get('/getFriendEvents/{friendcode}', verifyToken, async (req: Request, res: 
 
 app.get('/getAll', verifyToken, async (_req: Request, res: Response) => {
   const events = db.collection("events");
-  return res.status(200).json((await events.where("visibility", '==', "public").get()).docs);
+  return res.status(200).json((await events.where("visibility", '==', "public").get()).docs.map(doc => doc.data()));
 });
 
 app.get('/getAllPrivate', verifyToken, async (_req: Request, res: Response) => {
   const events = db.collection("events");
-  return res.status(200).json((await events.where("visibility", '==', "friends").get()).docs);
+  const friends = db.collection("friends");
+  const users = db.collection("users");
+  const allFriends = friends.where("firstuser", '==', await getTokenId(_req)).get();
+  const allUsers = await users.where("__name__", 'in', (await allFriends).docs.map(doc => doc.data().seconduser)).get();
+  return res.status(200).json((await events.where("visibility", '==', "friends").where("creator", 'in', allUsers.docs.map(doc => doc.id)).get()).docs.map(doc => doc.data()));
 });
 
 app.post('/create', verifyToken, async (req: Request, res: Response) => {
   const events = db.collection("events");
   if (validateEventBody(req)) {
     var event: typeof EventFields = getEvent(req.body);
+    event.visibility = event.visibility?.trim().toLowerCase() === "public" ? "public" : "friends";
     var users = db.collection("users");
-    var user = await users.where("id", "==", await getTokenId(req)).get();
+    var user = await users.where("__name__", "==", await getTokenId(req)).get();
     event.creator = user.docs[0].data().friendcode;
     event.id = uuidv4();
     const attends = db.collection("attends")
@@ -70,7 +75,7 @@ app.post('/create', verifyToken, async (req: Request, res: Response) => {
 
 app.delete('/delete/{id}', verifyToken, async (req: Request, res: Response) => {
   const events = db.collection("events");
-  const event = await events.where("id", '==', req.params.id).limit(1).get();
+  const event = await events.where("__name__", '==', req.params.id).limit(1).get();
   if (!event.empty) {
     const attends = db.collection("attends")
     attends.where("event", '==', event.docs[0].id).get().then((data) => { data.forEach(doc => { doc.ref.delete() }) });
@@ -82,7 +87,7 @@ app.delete('/delete/{id}', verifyToken, async (req: Request, res: Response) => {
 
 app.put('/update/{id}', verifyToken, async (req: Request, res: Response) => {
   const events = db.collection("events");
-  const event = await events.where("id", '==', req.params.id).limit(1).get();
+  const event = await events.where("__name__", '==', req.params.id).limit(1).get();
   if (!event.empty) {
     events.doc(event.docs[0].id).update(req.body);
     return res.status(200).json({ success: true });
@@ -93,7 +98,7 @@ app.put('/update/{id}', verifyToken, async (req: Request, res: Response) => {
 app.put('add/{id}', verifyToken, async (req: Request, res: Response) => {
   const events = db.collection("events");
   const users = db.collection("users");
-  const event = await events.where("id", '==', req.params.id).limit(1).get();
+  const event = await events.where("__name__", '==', req.params.id).limit(1).get();
   const user = await users.doc(await getTokenId(req)).get();
   if (!event.empty && !user.exists) {
     if (event.docs[0].data().visibility == "friends") {
@@ -121,7 +126,7 @@ app.put('add/{id}', verifyToken, async (req: Request, res: Response) => {
 app.delete('remove/{id}', verifyToken, async (req: Request, res: Response) => {
   const events = db.collection("events");
   const users = db.collection("users");
-  const event = await events.where("id", '==', req.params.id).limit(1).get();
+  const event = await events.where("__name__", '==', req.params.id).limit(1).get();
   const user = await users.doc(await getTokenId(req)).get();
   if (!event.empty && !user.exists) {
     const attends = db.collection("attends");
