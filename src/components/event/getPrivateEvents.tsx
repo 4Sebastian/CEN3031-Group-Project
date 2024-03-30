@@ -24,7 +24,7 @@ const PrivateEventListPage = () => {
       }
       setEvents(data);
     } catch (error) {
-      console.error('Error fetching public events:', error);
+      console.error('Error fetching private events:', error);
     } finally {
       setLoading(false);
     }
@@ -73,7 +73,7 @@ const PrivateEventListPage = () => {
         </List>
       ) : (
         <Typography color="black" variant="body1" align="center">
-          No public events available.
+          No private events available.
         </Typography>
       )}
     </Container>
