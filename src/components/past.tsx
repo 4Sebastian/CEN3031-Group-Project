@@ -15,7 +15,7 @@ export default function PastGroupsList() {
   return (
     <Box sx={{
       width: 0.33,
-      height: 1, // Adjust the height as needed
+      height: '80vh', // Adjust the height as needed
       backgroundColor: 'rgba(128, 128, 128, 0.75)',
       borderRadius: '15px',
       transition: 'box-shadow 0.1s ease',

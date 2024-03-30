@@ -11,7 +11,7 @@ export function validateRecord(req: Request<any, any, UserFieldType>, fields: Us
   const body = req.body;
 
   for (const field in fields) {
-    if (field! in required || (field in required && !required[field])) {
+    if (!(field in required) || (field in required && !required[field])) {
       continue;
     }
     if (typeof body[field] !== fields[field]) {

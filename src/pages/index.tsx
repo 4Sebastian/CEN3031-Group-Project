@@ -8,9 +8,10 @@ import Title from '@/components/title';
 import UserIcon from '@/components/userIcon';
 import GroupsList from '@/components/groups';
 import PuckDial from '@/components/puckdial';
+import LogButton from "@/components/logButton";
 
 import ChangePasswordPage from '@/components/user/changePassword';
-import CreateUserPage from '@/components/user/create';
+import CreateUserPage from '@/pages/createUser/[createUser]';
 import DeleteUserPage from '@/components/user/delete';
 import { LoginPage } from '@/components/user/login';
 import LogoutPage from '@/components/user/logout';
@@ -40,16 +41,17 @@ export default function Home() {
       try {
         const response = await getInfo();
         if (response.status === 200) {
-          setUserName(response.data.userName);
+          console.log(response.data)
+          setUserName(response.data.username);
+          setUserCreated(true);
         } else {
-          userCreated = false;
+          setUserCreated(false);
           console.error('Failed to fetch user information');
         }
       } catch (error) {
         console.error('Error while fetching user information:', error);
       }
     }
-
     fetchUserInfo(); // Call the fetchUserInfo function
   }, []); 
 
@@ -129,6 +131,7 @@ export default function Home() {
               {/* Title Stack */}
               <Stack direction="row" sx={{ height: 'min-content', justifyContent: 'space-between', padding: 3, position: 'relative', zIndex: 2 }}>
                 <Title />
+                <LogButton loggedIn  = {userCreated} />
                 <UserIcon onClick={handleUserIconClick} userName={userName} />
               </Stack>
       

@@ -1,6 +1,14 @@
 import { Typography } from '@mui/material';
+import { useRouter } from 'next/router';
 
 export default function Title() {
+
+  const router = useRouter();
+  
+  const handleTitle = () => {
+    router.push('/');
+  };
+
   return (
     <Typography
       sx={{
@@ -11,9 +19,9 @@ export default function Title() {
         transition: 'transform 0.3s ease, color 0.3s ease', // Adding color transition
         '&:hover': {
           transform: 'scale(1.1)',
-          color: 'blue', // Change to the desired color
         },
       }}
+      onClick={handleTitle}
     >
       Hockey-n-Go
     </Typography>

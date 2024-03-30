@@ -30,16 +30,15 @@ const UserPage = () => {
   const router = useRouter();
   const { userid } = router.query;
 
-  const [userInfo, setUserInfo] = useState({
-    userName: '',
-    rink: '',
-    skillLevel: '',
-    imageUrl: '',
+  const [userInfo, setUserInfo] = useState<any>({
+    username: 'User'
   });
 
   const handleUserIconClick = () => {
       console.log('thing')
       router.push('/');
+
+    
   };
 
   useEffect(() => {
@@ -48,7 +47,9 @@ const UserPage = () => {
       try {
         const response = await getInfo();
         if (response.status === 200) {
+          console.log(response)
           setUserInfo(response.data);
+          console.log(userInfo.username);
         } else {
           console.error('Failed to fetch user information');
         }
@@ -111,7 +112,7 @@ const UserPage = () => {
           {/* Title Stack */}
           <Stack direction="row" sx={{ height: 'min-content', justifyContent: 'space-between', padding: 3, position: 'relative', zIndex: 2 }}>
             <Title />
-            <UserIcon onClick={handleUserIconClick} userName={userInfo.userName} />
+            <UserIcon onClick={handleUserIconClick} userName={userInfo.username} />
           </Stack>
           {/* FriendsList Stack */}
           <Stack direction="row" sx={{ height: 1, justifyContent: 'space-between', padding: 3, position: 'relative', zIndex: 2 }}>

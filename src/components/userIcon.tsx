@@ -3,6 +3,7 @@ import { MouseEventHandler } from 'react';
 
 export default function UserIcon(props: {onClick: () => void, userName: string}) {
   // Extracting the first letter of the userName
+  console.log(props.userName);
   const letter = props.userName.charAt(0).toUpperCase();
 
   return (
