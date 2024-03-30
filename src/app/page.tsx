@@ -1,6 +1,11 @@
 "use client"
 import CreateEventPage from '@/components/event/createEvent';
+import DeleteEventPage from '@/components/event/deleteEvent';
+import EventInfoPage from '@/components/event/getEventInfo';
+import PrivateEventListPage from '@/components/event/getPrivateEvents';
 import PublicEventListPage from '@/components/event/getPublicEvents';
+import AttendEventPage from '@/components/event/joinEvent';
+import LeaveEventPage from '@/components/event/leaveEvent';
 import AddFriendPage from '@/components/friend/addFriend';
 import FriendsListPage from '@/components/friend/getFriends';
 import RemoveFriendPage from '@/components/friend/removeFriend';
@@ -31,6 +36,11 @@ export default function Home() {
         <RemoveFriendPage />
         <CreateEventPage />
         <PublicEventListPage />
+        <PrivateEventListPage />
+        <EventInfoPage />
+        <DeleteEventPage />
+        <AttendEventPage />
+        <LeaveEventPage />
       </Stack>
     </ThemeProvider>
   );

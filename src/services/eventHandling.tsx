@@ -39,6 +39,6 @@ export async function joinEvent(id: string): Promise<HttpResponse> {
 }
 
 export async function leaveEvent(id: string): Promise<HttpResponse> {
-  return httpRequest(`${eventUrl}/remove/${id}`, HttpMethod.PUT);
+  return httpRequest(`${eventUrl}/remove/${id}`, HttpMethod.DELETE);
 }
 

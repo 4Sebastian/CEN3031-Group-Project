@@ -18,16 +18,29 @@ app.get('/', async (_req: Request, res: Response) => {
   )
 });
 
-app.get('/getInfo/{id}', verifyToken, async (req: Request, res: Response) => {
+app.get('/getInfo/:id', verifyToken, async (req: Request, res: Response) => {
   const events = db.collection("events");
-  const event = await events.where("__name__", '==', req.params.id).limit(1).get();
+  const friends = db.collection("friends");
+  const users = db.collection("users");
+  const allFriends = friends.where("firstuser", '==', await getTokenId(req)).get();
+  var allFriendsMapped = (await allFriends).docs.map(doc => doc.data().seconduser);
+  allFriendsMapped.push(await getTokenId(req));
+
+  const allUsers = await users.where("__name__", 'in', allFriendsMapped).get();
+  const creaters = allUsers.docs.map(doc => doc.data().friendcode);
+
+  const event = await events.where("id", '==', req.params.id).limit(1).get();
   if (!event.empty) {
+    var data = event.docs[0].data();
+    if (data.visibility == "friends" && !creaters.includes(data.creator)) {
+      return res.status(300).json({ error: "Event not found" })
+    }
     return res.status(200).json(event.docs[0].data());
   }
   return res.status(300).json({ error: "Event not found" })
 });
 
-app.get('/getFriendEvents/{friendcode}', verifyToken, async (req: Request, res: Response) => {
+app.get('/getFriendEvents/:friendcode', verifyToken, async (req: Request, res: Response) => {
   const events = db.collection("events");
   const attends = db.collection("attends")
   var users = db.collection("users");
@@ -51,8 +64,17 @@ app.get('/getAllPrivate', verifyToken, async (_req: Request, res: Response) => {
   const friends = db.collection("friends");
   const users = db.collection("users");
   const allFriends = friends.where("firstuser", '==', await getTokenId(_req)).get();
-  const allUsers = await users.where("__name__", 'in', (await allFriends).docs.map(doc => doc.data().seconduser)).get();
-  return res.status(200).json((await events.where("visibility", '==', "friends").where("creator", 'in', allUsers.docs.map(doc => doc.id)).get()).docs.map(doc => doc.data()));
+  var allFriendsMapped = (await allFriends).docs.map(doc => doc.data().seconduser);
+  allFriendsMapped.push(await getTokenId(_req));
+  if (allFriendsMapped.length == 0) {
+    return res.status(200).json([])
+  }
+  const allUsers = await users.where("__name__", 'in', allFriendsMapped).get();
+  const creaters = allUsers.docs.map(doc => doc.data().friendcode);
+  if (creaters.length == 0) {
+    return res.status(200).json([])
+  }
+  return res.status(200).json((await events.where("visibility", '==', "friends").where("creator", 'in', creaters).get()).docs.map(doc => doc.data()));
 });
 
 app.post('/create', verifyToken, async (req: Request, res: Response) => {
@@ -61,11 +83,14 @@ app.post('/create', verifyToken, async (req: Request, res: Response) => {
     var event: typeof EventFields = getEvent(req.body);
     event.visibility = event.visibility?.trim().toLowerCase() === "public" ? "public" : "friends";
     var users = db.collection("users");
-    var user = await users.where("__name__", "==", await getTokenId(req)).get();
-    event.creator = user.docs[0].data().friendcode;
+    var user = (await users.doc(await getTokenId(req)).get());
+    if (user.data() == undefined && user.data()?.friendcode == undefined) {
+      return res.status(303).json({ error: "Invalid User" });
+    }
+    event.creator = user.data()?.friendcode;
     event.id = uuidv4();
     const attends = db.collection("attends")
-    var attend: typeof AttendsFields = { user: user.docs[0].id, event: event.id }
+    var attend: typeof AttendsFields = { user: user.id, event: event.id }
     attends.add(attend)
     events.add(event)
     return res.status(200).json({ success: true, id: event.id });
@@ -73,9 +98,9 @@ app.post('/create', verifyToken, async (req: Request, res: Response) => {
   return res.status(303).json({ error: "Invalid Event" });
 });
 
-app.delete('/delete/{id}', verifyToken, async (req: Request, res: Response) => {
+app.delete('/delete/:id', verifyToken, async (req: Request, res: Response) => {
   const events = db.collection("events");
-  const event = await events.where("__name__", '==', req.params.id).limit(1).get();
+  const event = await events.where("id", '==', req.params.id).limit(1).get();
   if (!event.empty) {
     const attends = db.collection("attends")
     attends.where("event", '==', event.docs[0].id).get().then((data) => { data.forEach(doc => { doc.ref.delete() }) });
@@ -85,9 +110,9 @@ app.delete('/delete/{id}', verifyToken, async (req: Request, res: Response) => {
   return res.status(300).json({ error: "Event not found" })
 });
 
-app.put('/update/{id}', verifyToken, async (req: Request, res: Response) => {
+app.put('/update/:id', verifyToken, async (req: Request, res: Response) => {
   const events = db.collection("events");
-  const event = await events.where("__name__", '==', req.params.id).limit(1).get();
+  const event = await events.where("id", '==', req.params.id).limit(1).get();
   if (!event.empty) {
     events.doc(event.docs[0].id).update(req.body);
     return res.status(200).json({ success: true });
@@ -95,18 +120,22 @@ app.put('/update/{id}', verifyToken, async (req: Request, res: Response) => {
   return res.status(300).json({ error: "Event not found" });
 });
 
-app.put('add/{id}', verifyToken, async (req: Request, res: Response) => {
+app.put('/add/:id', verifyToken, async (req: Request, res: Response) => {
   const events = db.collection("events");
   const users = db.collection("users");
-  const event = await events.where("__name__", '==', req.params.id).limit(1).get();
+  const event = await events.where("id", '==', req.params.id).limit(1).get();
   const user = await users.doc(await getTokenId(req)).get();
-  if (!event.empty && !user.exists) {
+  if (!event.empty && user.exists) {
     if (event.docs[0].data().visibility == "friends") {
       var creator = await users.where("friendcode", '==', event.docs[0].data().creator).limit(1).get();
       var friends = db.collection("friends");
       var friend = await friends.where("firstuser", '==', creator.docs[0].id).where("seconduser", '==', user.id).get();
-      if (!friend.empty) {
+      if (!friend.empty || user.data()?.friendcode == event.docs[0].data().creator) {
         const attends = db.collection("attends")
+        var mayAlreadyAttend = await attends.where("user", '==', user.id).where("event", '==', event.docs[0].id).get();
+        if (mayAlreadyAttend.size > 0) {
+          return res.status(303).json({ error: "Already attending" });
+        }
         var attend: typeof AttendsFields = { user: user.id, event: event.docs[0].id }
         attends.add(attend)
         return res.status(200).json({ success: true });
@@ -123,15 +152,19 @@ app.put('add/{id}', verifyToken, async (req: Request, res: Response) => {
   return res.status(300).json({ error: "Event or User not found" });
 });
 
-app.delete('remove/{id}', verifyToken, async (req: Request, res: Response) => {
+app.delete('/remove/:id', verifyToken, async (req: Request, res: Response) => {
   const events = db.collection("events");
   const users = db.collection("users");
-  const event = await events.where("__name__", '==', req.params.id).limit(1).get();
+  const event = await events.where("id", '==', req.params.id).limit(1).get();
   const user = await users.doc(await getTokenId(req)).get();
-  if (!event.empty && !user.exists) {
+  if (!event.empty && user.exists) {
     const attends = db.collection("attends");
-    attends.where("user", '==', user.id).where("event", '==', event.docs[0].id).get().then((data) => { data.forEach(doc => { doc.ref.delete() }) });
-    return res.status(200).json({ success: true });
+    var attendance = await attends.where("user", '==', user.id).where("event", '==', event.docs[0].id).get();
+    if (attendance.size > 0) {
+      attendance.forEach(doc => { doc.ref.delete() })
+      return res.status(200).json({ success: true });
+    }
+    return res.status(201).json({ message: "User not attending" });
   }
   return res.status(300).json({ error: "Event or User not found" });
 });
