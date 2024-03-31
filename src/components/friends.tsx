@@ -2,25 +2,34 @@ import { getFriends } from '@/services/friendHandling';
 import { Box, Button, Stack, Typography } from '@mui/material';
 import { useState, useEffect } from 'react';
 import { FriendFields } from '../../functions/src/components/friends';
+import { useRouter } from 'next/router';
 
-export default function FriendsList(props : {checkUser: Function}) {
+export default function FriendsList(props : {checkUser: string}) {
   const [friendsList, setFriendsList] = useState<any[]>([]);
   let [loggedIn, setLogged] = useState<boolean>(false)
 
+  const router = useRouter();
+  const handleViewFriend = (friend: any) => {
+    // Route to the dynamic [userid] page with the friend info
+    console.log(friend)
+    console.log(friend.userid)
+    router.push(`/users/[userid]`, `/${friend.userid}`);
+  };
+
   useEffect(() => {
-    props.checkUser()
-    console.log('printing friends')
     const f = async () => {
       var something = await getFriends();
       console.log(something);
       if (something.status == 200) {
-        
         setFriendsList(something.data);
         console.log('a friendly success')
       }
+      else{
+        setFriendsList([]);
+      }
     }
     f();
-  }, []);
+  }, [props.checkUser]);
 
   return (
     <Box sx={{
@@ -55,10 +64,9 @@ export default function FriendsList(props : {checkUser: Function}) {
           }}
           >
             <Typography color="black">{friend.username}</Typography>
-            <Button variant="contained" color="primary">
-              View
-            </Button>
-          </Box>
+            <Button variant="contained" color="primary" onClick={() => handleViewFriend(friend)}>
+              View</Button>
+            </Box>
         ))}
         <Button variant="contained" color="primary">
             Add Friend

@@ -3,7 +3,7 @@ import { Button } from '@mui/material';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 
-const LogButton = (props: { loggedIn: boolean, checkUser: Function }) => {
+const LogButton = (props: { loggedIn: boolean, setCheckUser: Function }) => {
   const router = useRouter();
   const [buttonString, setButtonString] = useState('Login');
   let [loggedIn, setLogged] = useState<boolean>(false)
@@ -20,10 +20,11 @@ const LogButton = (props: { loggedIn: boolean, checkUser: Function }) => {
       console.log('Logged out');
       logout();
       router.push('/');
-      props.checkUser();
+      props.setCheckUser(true);
       setLogged(isLoggedIn());
       setButtonString(isLoggedIn() ? "Logout" : "Login");
     } else {
+      props.setCheckUser(false)
       router.push('/login/login');
     }
   };

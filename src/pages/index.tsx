@@ -36,10 +36,6 @@ export default function Home() {
   let [userCreated, setUserCreated] = useState(false);
   let [shouldCheckUser, setCheckUser] = useState(false);
 
-  function checkUser(){
-    setCheckUser(!shouldCheckUser);
-  }
-
   const handleUserIconClick = () => {
     console.log('Clicked icon')
     if(userCreated){
@@ -140,14 +136,14 @@ export default function Home() {
               <Stack direction="row" alignItems="center" sx={{ height: 'min-content', justifyContent: 'space-between', padding: 3, position: 'relative', zIndex: 2 }}>
                 <Title />
                 <Stack direction="row" spacing={2}> {/* Adjust the spacing between LogButton and UserIcon */}
-                  <LogButton loggedIn={userCreated} checkUser={checkUser} />
+                  <LogButton loggedIn={userCreated} setCheckUser={setCheckUser} />
                   <UserIcon userName={userName} onclick={handleUserIconClick} />
                 </Stack>
               </Stack>
       
               {/* FriendsList Stack */}
               <Stack direction="row" sx={{ height: 1, justifyContent: 'space-between', padding: 3, position: 'relative', zIndex: 2 }}>
-                <FriendsList checkUser={checkUser} />
+                <FriendsList checkUser={userName} />
                 <GroupsList />
                 <PuckDial />
               </Stack>

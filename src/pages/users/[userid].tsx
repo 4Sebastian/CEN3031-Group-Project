@@ -112,7 +112,7 @@ const UserPage = () => {
           {/* Title Stack */}
           <Stack direction="row" sx={{ height: 'min-content', justifyContent: 'space-between', padding: 3, position: 'relative', zIndex: 2 }}>
             <Title />
-            <UserIcon onClick={handleUserIconClick} userName={userInfo.username} />
+            <UserIcon onclick={handleUserIconClick} userName={userInfo.username} />
           </Stack>
           {/* FriendsList Stack */}
           <Stack direction="row" sx={{ height: 1, justifyContent: 'space-between', padding: 3, position: 'relative', zIndex: 2 }}>
