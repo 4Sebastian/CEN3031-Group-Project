@@ -87,6 +87,15 @@ app.get('/getFriendEvents/:friendcode', verifyToken, async (req: Request, res: R
   return res.status(300).json({ error: "Friend not found" });
 });
 
+app.get('/getAllPersonal', verifyToken, async (_req: Request, res: Response) => {
+  const events = db.collection("events");
+  var friendcode = (await db.collection("users").doc(await getTokenId(_req)).get()).data()?.friendcode;
+  if (friendcode) {
+    return res.status(200).json((await events.where("creator", '==', friendcode).get()).docs.map(doc => doc.data()));
+  }
+  return res.status(300).json({ error: "User not found" });
+});
+
 app.get('/getAll', verifyToken, async (_req: Request, res: Response) => {
   const events = db.collection("events");
   return res.status(200).json((await events.where("visibility", '==', "public").get()).docs.map(doc => doc.data()));
@@ -152,6 +161,9 @@ app.put('/update/:id', verifyToken, async (req: Request, res: Response) => {
   const events = db.collection("events");
   const event = await events.where("id", '==', req.params.id).limit(1).get();
   if (!event.empty) {
+    if (req.body.visibility) {
+      req.body.visibility = req.body.visibility.trim().toLowerCase() === "public" ? "public" : "friends";
+    }
     events.doc(event.docs[0].id).update(req.body);
     return res.status(200).json({ success: true });
   }

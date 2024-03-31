@@ -3,6 +3,7 @@
 import { deleteEvent, getEventAttendees, getEventInfo, joinEvent, leaveEvent } from '@/services/eventHandling';
 import { Button, CircularProgress, Dialog, Paper, Snackbar, Stack, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
+import UpdateGroup from './updateGroup';
 
 const ViewGroup = (props: { groupId: string, open: boolean, handleClose: () => void, getEvents: () => void }) => {
   const [group, setGroup] = useState<any>({});
@@ -12,11 +13,14 @@ const ViewGroup = (props: { groupId: string, open: boolean, handleClose: () => v
   const [showSnackbar, setShowSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [alreadyAttending, setAlreadyAttending] = useState(false);
+  const [openUpdate, setOpenUpdate] = useState(false);
 
   async function getGroup() {
     setIsLoading(true);
     var response = await getEventInfo(props.groupId)
     if (response.status == 200) {
+      var data = response.data;
+      data.visibility = data.visibility == 'public' ? 'Public' : 'Private';
       setGroup(response.data)
       console.log(response)
       await checkOwner(response.data);
@@ -29,7 +33,7 @@ const ViewGroup = (props: { groupId: string, open: boolean, handleClose: () => v
     var response = await getEventAttendees(id);
     console.log(response)
     if (response.status == 200) {
-      if (typeof window !== 'undefined') {
+      if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
         var user = localStorage.getItem('UserData');
         var userData = JSON.parse(user || '{}');
         if (userData.friendcode) {
@@ -42,6 +46,7 @@ const ViewGroup = (props: { groupId: string, open: boolean, handleClose: () => v
       }
       setAttendees(response.data)
     }
+    setIsLoading(false);
   }
 
   async function handleDelete() {
@@ -58,7 +63,7 @@ const ViewGroup = (props: { groupId: string, open: boolean, handleClose: () => v
 
   async function checkOwner(data: any) {
     // console.log("check owner")
-    if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
       // console.log("window not undefined")
       var user = localStorage.getItem('UserData');
       var userData = JSON.parse(user || '{}');
@@ -81,18 +86,19 @@ const ViewGroup = (props: { groupId: string, open: boolean, handleClose: () => v
   const formatDateTime = (dateTimeString: string): string => {
     if (dateTimeString) {
       const utcDateTime = new Date(dateTimeString);
-
       const timeZoneOffset = utcDateTime.getTimezoneOffset();
-
       const localDateTime = new Date(utcDateTime.getTime() - timeZoneOffset * 60000);
-
-      return `${localDateTime.toLocaleDateString()} ${localDateTime.toLocaleTimeString()}`;
+      const options = { timeZone: 'UTC' };
+      const timeString = localDateTime.toLocaleString('en-US', options);
+      return `${timeString}`;
+      // return `${localDateTime.toLocaleDateString()} ${localDateTime.toLocaleTimeString()}`;
     }
     return "";
   };
 
 
   const handleJoin = async () => {
+    setIsLoading(true);
     console.log("joining")
     console.log(group.id)
     var something = await joinEvent(group.id);
@@ -109,6 +115,7 @@ const ViewGroup = (props: { groupId: string, open: boolean, handleClose: () => v
   }
 
   const handleLeave = async () => {
+    setIsLoading(true);
     console.log("leaving")
     var something = await leaveEvent(group.id);
     console.log(something)
@@ -123,7 +130,9 @@ const ViewGroup = (props: { groupId: string, open: boolean, handleClose: () => v
   }
 
   const handleEdit = async () => {
+    setIsLoading(true);
     console.log("edit")
+    setOpenUpdate(true)
   }
 
   useEffect(() => {
@@ -197,6 +206,7 @@ const ViewGroup = (props: { groupId: string, open: boolean, handleClose: () => v
         onClose={() => setShowSnackbar(false)}
         message={snackbarMessage}
       />
+      <UpdateGroup getEvents={props.getEvents} open={openUpdate} handleClose={() => { setIsLoading(false); setOpenUpdate(false) }} handleSuccessfulClose={() => { setIsLoading(false); setOpenUpdate(false); getGroup(); }} groupId={group.id} group={group} />
     </Dialog>
   );
 }

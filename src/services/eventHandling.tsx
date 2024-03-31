@@ -19,6 +19,10 @@ export async function getPrivateEvents(): Promise<HttpResponse> {
   return httpRequest(`${eventUrl}/getAllPrivate`, HttpMethod.GET);
 }
 
+export async function getPersonalEvents(): Promise<HttpResponse> {
+  return httpRequest(`${eventUrl}/getAllPersonal`, HttpMethod.GET);
+}
+
 type EventData = {
   name: string,
   datetime: string,
