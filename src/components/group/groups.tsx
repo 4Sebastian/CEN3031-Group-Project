@@ -3,7 +3,7 @@
 import { getPublicEvents } from '@/services/eventHandling';
 import { isLoggedIn } from '@/services/userHandling';
 import { Box, Stack, Typography, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, MenuItem } from '@mui/material';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import CreateGroup from './createGroup';
 import ViewGroup from './viewGroup';
 
@@ -43,6 +43,14 @@ export default function GroupsList() {
   }
 
   useState(() => getEvents())// getEvents()
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.addEventListener("StartCreateEvent", (event) => {
+        handleOpen();
+      });
+    }
+  }, [])
 
   return (
     <Stack sx={{

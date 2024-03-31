@@ -1,6 +1,6 @@
 "use client"
-import Image from "next/image"; 
-import styles from "./page.module.css"; 
+import Image from "next/image";
+import styles from "./page.module.css";
 import { useRouter } from 'next/router';
 import { Box, GlobalStyles, Stack, Typography, darken } from '@mui/material'
 import FriendsList from '@/components/friends';
@@ -48,6 +48,12 @@ export default function Home() {
     }
   };
 
+  const saveUserData = (data: any) => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem("UserData", JSON.stringify(data));
+    }
+  }
+
   useEffect(() => {
     // Fetch user information when the component mounts
     async function fetchUserInfo() {
@@ -57,6 +63,7 @@ export default function Home() {
           if (response.status === 200) {
             setUserName(response.data.username);
             setUserCreated(true);
+            saveUserData(response.data);
           } else {
             setUserCreated(false);
             console.error('Failed to fetch user information');
@@ -66,6 +73,7 @@ export default function Home() {
           console.log('logged out meow')
           setUserName('')
           setUserCreated(false)
+          saveUserData({});
         }
       } catch (error) {
         console.error('Error while fetching user information:', error);
