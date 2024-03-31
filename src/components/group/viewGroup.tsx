@@ -1,7 +1,7 @@
 
 "use client"
 import { deleteEvent, getEventAttendees, getEventInfo, joinEvent, leaveEvent } from '@/services/eventHandling';
-import { Button, CircularProgress, Dialog, Paper, Snackbar, Stack, Typography } from '@mui/material';
+import { Box, Button, CircularProgress, Dialog, Paper, Snackbar, Stack, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import UpdateGroup from './updateGroup';
 
@@ -142,7 +142,9 @@ const ViewGroup = (props: { groupId: string, open: boolean, handleClose: () => v
   return (
     <Dialog open={props.open} onClose={props.handleClose}>
       {isLoading ?
+      <Box sx={{ width: 100, height: 100, display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
         <CircularProgress sx={{ padding: 1 }} />
+      </Box>
         :
         <Paper sx={{ padding: 5 }}>
           <Typography variant="h5" gutterBottom>
@@ -177,7 +179,7 @@ const ViewGroup = (props: { groupId: string, open: boolean, handleClose: () => v
             }
           </Stack>
           <Typography variant="h6" gutterBottom>Attending Skaters:</Typography>
-          <Stack direction="column" sx={{ maxHeight: '30vh', overflowY: 'scroll' }}>
+          <Stack direction="column" sx={{ maxHeight: '30vh', overflowY: 'auto' }}>
             {attendees.map((attendee: any) => (
               <Paper sx={{ padding: 1, margin: 1 }} key={attendee.friendcode}>
                 <Typography variant="h5" gutterBottom>

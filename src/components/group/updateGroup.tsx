@@ -21,7 +21,7 @@ const UpdateGroup = (props: { getEvents: () => void, groupId: string, open: bool
     location: props.group.location,
     recommendedskilllevel: props.group.recommendedskilllevel,
     datetime: formatDateTime(props.group.datetime),
-    visibility: props.group.visibility.toLowerCase() == 'public' ? 'Public' : 'Private',
+    visibility: props.group.visibility?.toLowerCase() == 'public' ? 'Public' : 'Private',
   });
 
   useEffect(() => {
@@ -30,7 +30,7 @@ const UpdateGroup = (props: { getEvents: () => void, groupId: string, open: bool
       location: props.group.location,
       recommendedskilllevel: props.group.recommendedskilllevel,
       datetime: formatDateTime(props.group.datetime),
-      visibility: props.group.visibility.toLowerCase() == 'public' ? 'Public' : 'Private',
+      visibility: props.group.visibility?.toLowerCase() == 'public' ? 'Public' : 'Private',
     });
   }, [props.groupId]);
 
