@@ -101,7 +101,12 @@ app.post('/create', verifyToken, async (req: Request, res: Response) => {
 app.delete('/delete/:id', verifyToken, async (req: Request, res: Response) => {
   const events = db.collection("events");
   const event = await events.where("id", '==', req.params.id).limit(1).get();
+  var users = db.collection("users");
+  var user = (await users.doc(await getTokenId(req)).get());
   if (!event.empty) {
+    if (event.docs[0].data().creator != user.data()?.friendcode) {
+      return res.status(303).json({ error: "Wrong User" });
+    }
     const attends = db.collection("attends")
     attends.where("event", '==', event.docs[0].id).get().then((data) => { data.forEach(doc => { doc.ref.delete() }) });
     events.doc(event.docs[0].id).delete();
