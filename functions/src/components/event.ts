@@ -3,6 +3,7 @@ import { Request } from "express";
 
 export var EventFields: UserFieldType = {
   id: 'string',
+  name: 'string',
   creator: 'string',
   datetime: 'string',
   recommendedskilllevel: 'string',
@@ -12,6 +13,7 @@ export var EventFields: UserFieldType = {
 
 export var requiredEventFields: UserRequireType = {
   id: false,
+  name: true,
   datetime: true,
   location: true,
 }

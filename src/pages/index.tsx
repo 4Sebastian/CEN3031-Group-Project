@@ -1,12 +1,10 @@
 "use client"
-import Image from "next/image";
-import styles from "./page.module.css";
-import { useRouter } from 'next/navigation';
+import Image from "next/image"; import styles from "./page.module.css"; import { useRouter } from 'next/navigation';
 import { Box, GlobalStyles, Stack, Typography, darken } from '@mui/material'
 import FriendsList from '@/components/friends';
 import Title from '@/components/title';
 import UserIcon from '@/components/userIcon';
-import GroupsList from '@/components/groups';
+import GroupsList from '@/components/group/groups';
 import PuckDial from '@/components/puckdial';
 import LogButton from "@/components/logButton";
 
@@ -31,18 +29,18 @@ const darkenedColor50Percent2 = darken('#5ADBFF', 0.5);
 
 export default function Home() {
   const router = useRouter();
-  const [userName, setUserName] = useState(""); 
+  const [userName, setUserName] = useState("");
   const [activeComponent, setActiveComponent] = useState('home');
   let [userCreated, setUserCreated] = useState(false);
   let [shouldCheckUser, setCheckUser] = useState(false);
 
-  function checkUser(){
+  function checkUser() {
     setCheckUser(!shouldCheckUser);
   }
 
   const handleUserIconClick = () => {
     console.log('Clicked icon')
-    if(userCreated){
+    if (userCreated) {
       console.log('User is created')
       router.push('/users/meow');
     }
@@ -52,7 +50,7 @@ export default function Home() {
     // Fetch user information when the component mounts
     async function fetchUserInfo() {
       try {
-        if(isLoggedIn()){
+        if (isLoggedIn()) {
           const response = await getInfo();
           if (response.status === 200) {
             setUserName(response.data.username);
@@ -62,7 +60,7 @@ export default function Home() {
             console.error('Failed to fetch user information');
           }
         }
-        else{
+        else {
           console.log('logged out meow')
           setUserName('')
           setUserCreated(false)
@@ -72,7 +70,7 @@ export default function Home() {
       }
     }
     fetchUserInfo(); // Call the fetchUserInfo function
-  }, [shouldCheckUser]); 
+  }, [shouldCheckUser]);
 
   const renderActiveComponent = () => {
     switch (activeComponent) {
@@ -106,10 +104,10 @@ export default function Home() {
                 background: `linear-gradient(to bottom, ${NormColor1}, ${darkenedColor50Percent1})`,
                 clipPath: 'polygon(0 0, 100% 0, 40% 100%, 0% 100%)',
                 zIndex: -1,
-                
+
               }}
             />
-      
+
             {/* Right trapezoid with gradient and shadow */}
             <Box sx={{
               position: 'absolute',
@@ -126,14 +124,14 @@ export default function Home() {
                   right: 0,
                   width: '70%',
                   height: '100%',
-                  zindex : 1,
+                  zindex: 1,
                   background: `linear-gradient(to top, ${NormColor2}, ${darkenedColor50Percent2})`,
                   clipPath: 'polygon(60% 0, 100% 0, 100% 100%, 0 100%)',
-                  
+
                 }}
               />
             </Box>
-      
+
             {/* Content */}
             <Stack direction="column" sx={{ width: '100%', height: '100%', justifyContent: 'flex-start', position: 'relative', zIndex: 1 }}>
               {/* Title Stack */}
@@ -144,7 +142,7 @@ export default function Home() {
                   <UserIcon userName={userName} onclick={handleUserIconClick} />
                 </Stack>
               </Stack>
-      
+
               {/* FriendsList Stack */}
               <Stack direction="row" sx={{ height: 1, justifyContent: 'space-between', padding: 3, position: 'relative', zIndex: 2 }}>
                 <FriendsList checkUser={checkUser} />

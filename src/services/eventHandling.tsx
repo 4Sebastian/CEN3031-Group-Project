@@ -16,6 +16,7 @@ export async function getPrivateEvents(): Promise<HttpResponse> {
 }
 
 type EventData = {
+  name: string,
   datetime: string,
   recommendedskilllevel: string,
   location: string,

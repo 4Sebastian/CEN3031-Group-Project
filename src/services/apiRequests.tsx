@@ -25,11 +25,16 @@ export interface HttpResponse {
  * @param token - The bearer token to set.
  */
 export function setBearerToken(token: string) {
-  localStorage.setItem('userToken', token);
+  if (window !== undefined) {
+    localStorage.setItem('userToken', token);
+  }
 }
 
-export function getBearerToken(){
-  return localStorage.getItem('userToken')
+export function getBearerToken() {
+  if (window !== undefined) {
+    return localStorage.getItem('userToken')
+  }
+  return ''
 }
 
 /**

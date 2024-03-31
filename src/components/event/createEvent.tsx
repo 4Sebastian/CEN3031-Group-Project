@@ -33,6 +33,7 @@ const CreateEventPage = () => {
 
     // console.log(utcDateTime.toString())
     const something = await createEvent({
+      name: "",
       datetime: utcDateTime.toString(),
       recommendedskilllevel: skillLevel,
       location: location,
@@ -115,6 +116,5 @@ const CreateEventPage = () => {
     </Container>
   );
 }
-
 export default CreateEventPage;
 
