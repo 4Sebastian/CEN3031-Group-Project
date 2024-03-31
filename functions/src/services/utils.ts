@@ -25,7 +25,7 @@ export function validateRecord(req: Request<any, any, UserFieldType>, fields: Us
 export function getRecord(body: any, fields: UserFieldType): (typeof fields) {
   var info: typeof fields = {};
   for (const field in fields) {
-    if (body[field] === undefined || body[field] === null || body[field] === "") {
+    if (body[field] === undefined || body[field] === null || body[field] === "") { 
       continue;
     }
     info[field] = body[field];

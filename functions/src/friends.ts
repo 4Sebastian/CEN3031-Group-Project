@@ -51,6 +51,9 @@ app.post('/add', verifyToken, async (req: Request, res: Response) => {
     var friendcode: string = req.body.friendcode;
     var otherUser = await users.where("friendcode", "==", friendcode?.trim()).limit(1).get();
     if (!otherUser.empty) {
+      if(otherUser.docs[0].id == id){
+        return res.status(303).json({ error: "Cannot friend yourself" });
+      }
       var potentialFriend = await friends.where("firstuser", "==", otherUser.docs[0].id).where("seconduser", "==", id).limit(1).get();
       if (potentialFriend.empty) {
         friends.add({ firstuser: id, seconduser: otherUser.docs[0].id });

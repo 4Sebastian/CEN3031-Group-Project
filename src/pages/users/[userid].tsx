@@ -30,6 +30,10 @@ const profileImageUrl = 'https://osu.ppy.sh/assets/images/avatar-guest.8a2df920.
 const UserPage = () => {
   const router = useRouter();
   const { userid } = router.query;
+  const[isLoggedInUser, setLoggedInUser] = useState(true);
+  const[skilllevel, setSkillLevel] = useState('')
+  const[iceRink, setIceRink] = useState('')
+  const[currentUser, setCurrentUser] = useState('')
   const [userInfo, setUserInfo] = useState<any>({
     username: 'User'
   });
@@ -37,9 +41,13 @@ const UserPage = () => {
   const handleUserIconClick = () => {
     console.log('thing')
     router.push('/');
-
-
   };
+
+  function setAttributes(attributes: any){
+    console.log(attributes)
+    setSkillLevel(attributes.skilllevel ? attributes.skilllevel : "Not Set")
+    setIceRink(attributes.homerink ? attributes.homerink : "Not Set")
+  }
 
   useEffect(() => {
     // Fetch user information when the component mounts
@@ -47,10 +55,11 @@ const UserPage = () => {
     async function fetchUserInfo() {
       try {
         const response = await getInfo();
+        setCurrentUser(response.data.username)
         if(response.data.username == userid){
+          setLoggedInUser(true)
           if (response.status === 200) {
-            console.log('hello there')
-            console.log(response)
+            setAttributes(response.data)
             setUserInfo(response.data);
             console.log(userInfo.username);
             console.log(userid)
@@ -59,10 +68,12 @@ const UserPage = () => {
           }
         }
         else{
+          setLoggedInUser(false)
           console.log(userid)
           if (typeof userid === 'string') {
             const response = await getFriendInfo(userid);
             setUserInfo(response.data);
+            setAttributes(response.data)
             console.log(response)
             console.log(userInfo.username);
           }
@@ -152,20 +163,14 @@ const UserPage = () => {
           {/* Title Stack */}
           <Stack direction="row" sx={{ height: 'min-content', justifyContent: 'space-between', padding: 3, position: 'relative', zIndex: 2 }}>
             <Title />
-            <UserIcon onclick={handleUserIconClick} userName={userInfo.username} />
+            <UserIcon onclick={handleUserIconClick} userName={currentUser} />
           </Stack>
           {/* FriendsList Stack */}
           <Stack direction="row" sx={{ height: 1, justifyContent: 'space-between', padding: 3, position: 'relative', zIndex: 2 }}>
-            <UserProfile rink='kendal ice arena' name='Nicholas Hartog' skillLevel='intermediate' imageUrl={profileImageUrl} />
+            <UserProfile rink={iceRink} name={userid as string} skillLevel={skilllevel} imageUrl={profileImageUrl} editButton = {isLoggedInUser} friendcode = {userInfo.friendcode}/>
             <CurrentGroupsList />
             <PastGroupsList />
           </Stack>
-        </Stack>
-        {/* FriendsList Stack */}
-        <Stack direction="row" sx={{ height: 1, justifyContent: 'space-between', padding: 3, position: 'relative', zIndex: 2 }}>
-          <UserProfile rink='kendal ice arena' name='Nicholas Hartog' skillLevel='intermediate' imageUrl={profileImageUrl} />
-          <CurrentGroupsList />
-          <PastGroupsList />
         </Stack>
       </Box>
     </Box>
