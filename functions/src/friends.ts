@@ -1,6 +1,7 @@
 import express, { Express, Request, Response } from "express";
 import { verifyToken, getTokenId } from "./services/authentication";
 import db from './services/database';
+import { UserFields, getUser } from "./components/user";
 
 const app: Express = express();
 
@@ -14,6 +15,9 @@ app.get('/', async (_req: Request, res: Response) => {
     }
   )
 })
+
+
+
 
 app.get('/list', verifyToken, async (req: Request, res: Response) => {
   var users = db.collection("users");
@@ -87,5 +91,18 @@ app.delete('/remove', verifyToken, async (req: Request, res: Response) => {
   return res.status(404).json({ message: "Not authorized" });
 });
 
+app.get('/getInfo/:username', verifyToken, async (req: Request, res: Response) => {
+  const users = db.collection("users");
+    
+    var friend = await users.where("username", "==", req.params.username).limit(1).get(); 
+    
+    if(friend.size > 0){
+      var data = friend.docs[0].data();
+      var info: typeof UserFields = getUser(data);
+      delete info.password;
+      return res.status(200).json(info);
+    }
+    return res.status(300).json({ error: "Invalid User Name:"});
+});
 
 export default app;

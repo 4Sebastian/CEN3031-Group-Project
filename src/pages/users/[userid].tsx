@@ -15,6 +15,7 @@ import PuckDial from '@/components/puckdial';
 import CurrentGroupsList from '@/components/current';
 import PastGroupsList from '@/components/past';
 import UserProfile from '@/components/UserProfile';
+import { getFriendInfo } from '@/services/friendHandling';
 
 
 const NormColor1 = '#C83E4D';
@@ -29,7 +30,6 @@ const profileImageUrl = 'https://osu.ppy.sh/assets/images/avatar-guest.8a2df920.
 const UserPage = () => {
   const router = useRouter();
   const { userid } = router.query;
-
   const [userInfo, setUserInfo] = useState<any>({
     username: 'User'
   });
@@ -43,16 +43,34 @@ const UserPage = () => {
 
   useEffect(() => {
     // Fetch user information when the component mounts
+    console.log('hello there')
     async function fetchUserInfo() {
       try {
         const response = await getInfo();
-        if (response.status === 200) {
-          console.log(response)
-          setUserInfo(response.data);
-          console.log(userInfo.username);
-        } else {
-          console.error('Failed to fetch user information');
+        if(response.data.username == userid){
+          if (response.status === 200) {
+            console.log('hello there')
+            console.log(response)
+            setUserInfo(response.data);
+            console.log(userInfo.username);
+            console.log(userid)
+          } else {
+            console.error('Failed to fetch user information');
+          }
         }
+        else{
+          console.log(userid)
+          if (typeof userid === 'string') {
+            const response = await getFriendInfo(userid);
+            setUserInfo(response.data);
+            console.log(response)
+            console.log(userInfo.username);
+          }
+          else{
+            console.error('User ID is not a valid string:', userid);
+          }
+        }
+        
       } catch (error) {
         console.error('Error while fetching user information:', error);
       }

@@ -1,5 +1,7 @@
 "use client"
-import Image from "next/image"; import styles from "./page.module.css"; import { useRouter } from 'next/navigation';
+import Image from "next/image"; 
+import styles from "./page.module.css"; 
+import { useRouter } from 'next/router';
 import { Box, GlobalStyles, Stack, Typography, darken } from '@mui/material'
 import FriendsList from '@/components/friends';
 import Title from '@/components/title';
@@ -42,7 +44,7 @@ export default function Home() {
     console.log('Clicked icon')
     if (userCreated) {
       console.log('User is created')
-      router.push('/users/meow');
+      router.push(`/users/${userName}`);
     }
   };
 

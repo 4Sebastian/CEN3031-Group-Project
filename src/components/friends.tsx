@@ -12,8 +12,9 @@ export default function FriendsList(props : {checkUser: string}) {
   const handleViewFriend = (friend: any) => {
     // Route to the dynamic [userid] page with the friend info
     console.log(friend)
-    console.log(friend.userid)
-    router.push(`/users/[userid]`, `/${friend.userid}`);
+    console.log(friend.username)
+    router.push(`/users/${friend.username}`);
+
   };
 
   useEffect(() => {

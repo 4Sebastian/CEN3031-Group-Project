@@ -7,6 +7,11 @@ export async function getFriends(): Promise<HttpResponse> {
   return httpRequest(`${friendUrl}/list`, HttpMethod.GET);
 }
 
+export async function getFriendInfo(username: string): Promise<HttpResponse> {
+  return httpRequest(`${friendUrl}/getInfo/${username}`, HttpMethod.GET);
+}
+
+
 export async function addFriend(friendcode: string): Promise<HttpResponse> {
   return httpRequest(`${friendUrl}/add`, HttpMethod.POST, { friendcode: friendcode });
 }
