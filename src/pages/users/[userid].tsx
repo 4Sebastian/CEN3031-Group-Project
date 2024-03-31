@@ -106,13 +106,42 @@ const UserPage = () => {
 
           }}
         />
-      </Box>
-      {/* Content */}
-      <Stack direction="column" sx={{ width: '100%', height: '100%', justifyContent: 'flex-start', position: 'relative', zIndex: 1 }}>
-        {/* Title Stack */}
-        <Stack direction="row" sx={{ height: 'min-content', justifyContent: 'space-between', padding: 3, position: 'relative', zIndex: 2 }}>
-          <Title />
-          <UserIcon onclick={handleUserIconClick} userName={userInfo.username} />
+        {/* Right trapezoid with gradient and shadow */}
+        <Box sx={{
+          position: 'absolute',
+          top: 0,
+          right: 0,
+          filter: 'drop-shadow(-10px 0px 15px rgba(0, 0, 0, 0.5))',
+          width: 1,
+          height: 1,
+        }}>
+          <Box
+            sx={{
+              position: 'absolute',
+              top: 0,
+              right: 0,
+              width: '70%',
+              height: '100%',
+              zindex: 1,
+              background: `linear-gradient(to top, ${NormColor2}, ${darkenedColor50Percent2})`,
+              clipPath: 'polygon(60% 0, 100% 0, 100% 100%, 0 100%)',
+
+            }}
+          />
+        </Box>
+        {/* Content */}
+        <Stack direction="column" sx={{ width: '100%', height: '100%', justifyContent: 'flex-start', position: 'relative', zIndex: 1 }}>
+          {/* Title Stack */}
+          <Stack direction="row" sx={{ height: 'min-content', justifyContent: 'space-between', padding: 3, position: 'relative', zIndex: 2 }}>
+            <Title />
+            <UserIcon onclick={handleUserIconClick} userName={userInfo.username} />
+          </Stack>
+          {/* FriendsList Stack */}
+          <Stack direction="row" sx={{ height: 1, justifyContent: 'space-between', padding: 3, position: 'relative', zIndex: 2 }}>
+            <UserProfile rink='kendal ice arena' name='Nicholas Hartog' skillLevel='intermediate' imageUrl={profileImageUrl} />
+            <CurrentGroupsList />
+            <PastGroupsList />
+          </Stack>
         </Stack>
         {/* FriendsList Stack */}
         <Stack direction="row" sx={{ height: 1, justifyContent: 'space-between', padding: 3, position: 'relative', zIndex: 2 }}>
@@ -120,7 +149,7 @@ const UserPage = () => {
           <CurrentGroupsList />
           <PastGroupsList />
         </Stack>
-      </Stack>
+      </Box>
     </Box>
   );
 };
