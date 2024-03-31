@@ -40,6 +40,39 @@ app.get('/getInfo/:id', verifyToken, async (req: Request, res: Response) => {
   return res.status(300).json({ error: "Event not found" })
 });
 
+app.get('/getAttendees/:id', verifyToken, async (req: Request, res: Response) => {
+  const events = db.collection("events");
+  const friends = db.collection("friends");
+  const users = db.collection("users");
+  const allFriends = friends.where("firstuser", '==', await getTokenId(req)).get();
+  var allFriendsMapped = (await allFriends).docs.map(doc => doc.data().seconduser);
+  allFriendsMapped.push(await getTokenId(req));
+
+  const allUsers = await users.where("__name__", 'in', allFriendsMapped).get();
+  const creaters = allUsers.docs.map(doc => doc.data().friendcode);
+
+  const event = await events.where("id", '==', req.params.id).limit(1).get();
+  if (!event.empty) {
+    var data = event.docs[0].data();
+    if (data.visibility == "friends" && !creaters.includes(data.creator)) {
+      return res.status(300).json({ error: "Event not found" })
+    }
+    const attends = db.collection("attends");
+    const attending = (await attends.where("event", '==', event.docs[0].data().id).get()).docs.map(doc => doc.data().user);
+    if (attending.length == 0) {
+      return res.status(200).json([])
+    }
+    const attendingUsers = await users.where("__name__", 'in', attending).get();
+    const usersData = attendingUsers.docs.map(doc => {
+      var data = doc.data();
+      delete data.password;
+      return data;
+    });
+    return res.status(200).json(usersData);
+  }
+  return res.status(300).json({ error: "Event not found" })
+});
+
 app.get('/getFriendEvents/:friendcode', verifyToken, async (req: Request, res: Response) => {
   const events = db.collection("events");
   const attends = db.collection("attends")
@@ -52,6 +85,15 @@ app.get('/getFriendEvents/:friendcode', verifyToken, async (req: Request, res: R
     return res.status(200).json(eventsInfo.docs);
   }
   return res.status(300).json({ error: "Friend not found" });
+});
+
+app.get('/getAllPersonal', verifyToken, async (_req: Request, res: Response) => {
+  const events = db.collection("events");
+  var friendcode = (await db.collection("users").doc(await getTokenId(_req)).get()).data()?.friendcode;
+  if (friendcode) {
+    return res.status(200).json((await events.where("creator", '==', friendcode).get()).docs.map(doc => doc.data()));
+  }
+  return res.status(300).json({ error: "User not found" });
 });
 
 app.get('/getAll', verifyToken, async (_req: Request, res: Response) => {
@@ -108,7 +150,7 @@ app.delete('/delete/:id', verifyToken, async (req: Request, res: Response) => {
       return res.status(303).json({ error: "Wrong User" });
     }
     const attends = db.collection("attends")
-    attends.where("event", '==', event.docs[0].id).get().then((data) => { data.forEach(doc => { doc.ref.delete() }) });
+    attends.where("event", '==', event.docs[0].data().id).get().then((data) => { data.forEach(doc => { doc.ref.delete() }) });
     events.doc(event.docs[0].id).delete();
     return res.status(200).json({ success: true });
   }
@@ -119,6 +161,9 @@ app.put('/update/:id', verifyToken, async (req: Request, res: Response) => {
   const events = db.collection("events");
   const event = await events.where("id", '==', req.params.id).limit(1).get();
   if (!event.empty) {
+    if (req.body.visibility) {
+      req.body.visibility = req.body.visibility.trim().toLowerCase() === "public" ? "public" : "friends";
+    }
     events.doc(event.docs[0].id).update(req.body);
     return res.status(200).json({ success: true });
   }
@@ -137,11 +182,11 @@ app.put('/add/:id', verifyToken, async (req: Request, res: Response) => {
       var friend = await friends.where("firstuser", '==', creator.docs[0].id).where("seconduser", '==', user.id).get();
       if (!friend.empty || user.data()?.friendcode == event.docs[0].data().creator) {
         const attends = db.collection("attends")
-        var mayAlreadyAttend = await attends.where("user", '==', user.id).where("event", '==', event.docs[0].id).get();
+        var mayAlreadyAttend = await attends.where("user", '==', user.id).where("event", '==', event.docs[0].data().id).get();
         if (mayAlreadyAttend.size > 0) {
           return res.status(303).json({ error: "Already attending" });
         }
-        var attend: typeof AttendsFields = { user: user.id, event: event.docs[0].id }
+        var attend: typeof AttendsFields = { user: user.id, event: event.docs[0].data().id }
         attends.add(attend)
         return res.status(200).json({ success: true });
       } else {
@@ -149,7 +194,11 @@ app.put('/add/:id', verifyToken, async (req: Request, res: Response) => {
       }
     } else {
       const attends = db.collection("attends")
-      var attend: typeof AttendsFields = { user: user.id, event: event.docs[0].id }
+      var mayAlreadyAttend = await attends.where("user", '==', user.id).where("event", '==', event.docs[0].data().id).get();
+      if (mayAlreadyAttend.size > 0) {
+        return res.status(303).json({ error: "Already attending" });
+      }
+      var attend: typeof AttendsFields = { user: user.id, event: event.docs[0].data().id }
       attends.add(attend)
       return res.status(200).json({ success: true });
     }
@@ -164,7 +213,7 @@ app.delete('/remove/:id', verifyToken, async (req: Request, res: Response) => {
   const user = await users.doc(await getTokenId(req)).get();
   if (!event.empty && user.exists) {
     const attends = db.collection("attends");
-    var attendance = await attends.where("user", '==', user.id).where("event", '==', event.docs[0].id).get();
+    var attendance = await attends.where("user", '==', user.id).where("event", '==', event.docs[0].data().id).get();
     if (attendance.size > 0) {
       attendance.forEach(doc => { doc.ref.delete() })
       return res.status(200).json({ success: true });

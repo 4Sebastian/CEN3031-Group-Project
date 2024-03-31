@@ -14,20 +14,34 @@ const customIconUrl = "components/hockey-puck.png";
 const customOpenIconUrl = "components/Hockey_Net.webp";
 
 const actions = [
-  { icon: <EventIcon />, name: 'Create Event'},
-  { icon: <SportsHockeyIcon />, name: 'Join Event'},
-  { icon: <AccountBoxIcon />, name: 'View Profile'},
-  { icon: <PersonAddIcon />, name: 'Add Friend'},
+  { icon: <EventIcon />, name: 'Create Event' },
+  { icon: <SportsHockeyIcon />, name: 'Join Event' },
+  { icon: <AccountBoxIcon />, name: 'View Profile' },
+  { icon: <PersonAddIcon />, name: 'Add Friend' },
 ];
 
 export default function PuckDial() {
-  const router = useRouter(); 
+  const router = useRouter();
 
   const handleActionClick = async (actionName: string) => {
     if (actionName === 'View Profile') {
-      const response =  await getInfo();
-      const username = response.data.username;
-      router.push(`/users/${username}`); 
+      router.push('/users/meow');
+    }
+
+    switch (actionName) {
+      case 'View Profile':
+        router.push('/users/meow');
+        break;
+      case 'Create Event':
+        const createEvent = new CustomEvent("StartCreateEvent", {
+          detail: {
+          }
+        });
+
+        // Dispatch the custom event from the window object
+        window.dispatchEvent(createEvent);
+        console.log("create event");
+        break;
     }
   };
   return (

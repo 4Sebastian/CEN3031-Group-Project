@@ -7,12 +7,20 @@ export async function getEventInfo(id: string): Promise<HttpResponse> {
   return httpRequest(`${eventUrl}/getInfo/${id}`, HttpMethod.GET);
 }
 
+export async function getEventAttendees(id: string): Promise<HttpResponse> {
+  return httpRequest(`${eventUrl}/getAttendees/${id}`, HttpMethod.GET);
+}
+
 export async function getPublicEvents(): Promise<HttpResponse> {
   return httpRequest(`${eventUrl}/getAll`, HttpMethod.GET);
 }
 
 export async function getPrivateEvents(): Promise<HttpResponse> {
   return httpRequest(`${eventUrl}/getAllPrivate`, HttpMethod.GET);
+}
+
+export async function getPersonalEvents(): Promise<HttpResponse> {
+  return httpRequest(`${eventUrl}/getAllPersonal`, HttpMethod.GET);
 }
 
 type EventData = {
