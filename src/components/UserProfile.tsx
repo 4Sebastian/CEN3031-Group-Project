@@ -22,83 +22,83 @@ export default function UserProfile(props: { name: string, rink: string, skillLe
         skilllevel: defaultSkill
     });
 
-    const [viewingAttributes, setViewingAttributes] = useState({
+  const [viewingAttributes, setViewingAttributes] = useState({
+    username: props.name,
+    homerink: props.rink,
+    skilllevel: props.skillLevel
+  });
+
+  const handleEditClick = () => {
+    setEditedAttributes(viewingAttributes);
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const handleChange = (event: React.ChangeEvent<{ name?: string; value: unknown }>, attribute: string) => {
+    const { value } = event.target;
+    setEditedAttributes({ ...editedAttributes, [attribute]: value as string });
+  };
+
+  const handleViewFriendCodeClick = () => {
+    setFriendCodeDialogOpen(true);
+  };
+
+  const handleCloseFriendCodeDialog = () => {
+    setFriendCodeDialogOpen(false);
+  };
+
+  const handleCopyToClipboard = () => {
+    // Copy the friend code to clipboard
+    navigator.clipboard.writeText(props.friendcode);
+  };
+
+  const handleSave = async (e: any) => {
+    e.preventDefault()
+    let passingAttributes: { [key: string]: string | undefined } = {
+      username: editedAttributes.username,
+      homerink: editedAttributes.homerink,
+      skilllevel: editedAttributes.skilllevel
+    };
+
+    // Remove properties with null values
+    for (let key in passingAttributes) {
+      console.log(passingAttributes[key])
+      if (passingAttributes[key] === null || passingAttributes[key] === "" || passingAttributes[key] === "Not Set") {
+        delete passingAttributes[key];
+      }
+    }
+    var something = await update(passingAttributes);
+    console.log(something)
+    if (something.status == 200) {
+      setViewingAttributes(editedAttributes)
+    }
+    // Perform save operation with editedAttributes
+    console.log("Edited Attributes:", passingAttributes);
+    // Close the modal
+    setOpen(false);
+    if (passingAttributes.username != props.name) {
+      console.log("I am here")
+      router.push(`/users/${passingAttributes.username}`)
+    }
+
+  };
+
+  useEffect(() => {
+    console.log("hello")
+    setEditedAttributes({
       username: props.name,
       homerink: props.rink,
       skilllevel: props.skillLevel
-    });
-
-    const handleEditClick = () => {
-      setEditedAttributes(viewingAttributes);
-        setOpen(true);
-    };
-
-    const handleClose = () => {
-        setOpen(false);
-    };
-
-    const handleChange = (event: React.ChangeEvent<{ name?: string; value: unknown }>, attribute: string) => {
-        const { value } = event.target;
-        setEditedAttributes({ ...editedAttributes, [attribute]: value as string });
-    };
-
-    const handleViewFriendCodeClick = () => {
-        setFriendCodeDialogOpen(true);
-    };
-
-    const handleCloseFriendCodeDialog = () => {
-        setFriendCodeDialogOpen(false);
-    };
-
-  const handleCopyToClipboard = () => {
-      // Copy the friend code to clipboard
-      navigator.clipboard.writeText(props.friendcode);
-  };
-
-    const handleSave = async (e: any) => {
-      e.preventDefault()
-      let passingAttributes: { [key: string]: string | undefined } = {
-        username: editedAttributes.username,
-        homerink: editedAttributes.homerink,
-        skilllevel: editedAttributes.skilllevel
-      };
-      
-      // Remove properties with null values
-      for (let key in passingAttributes) {
-        console.log(passingAttributes[key])
-          if (passingAttributes[key] === null || passingAttributes[key] === "" || passingAttributes[key] === "Not Set") {
-              delete passingAttributes[key];
-          }
-      }
-      var something = await update(passingAttributes);
-      console.log(something)
-      if(something.status == 200){
-        setViewingAttributes(editedAttributes)
-      }
-      // Perform save operation with editedAttributes
-      console.log("Edited Attributes:", passingAttributes);
-      // Close the modal
-      setOpen(false);
-      if(passingAttributes.username != props.name){
-        console.log("I am here")
-        router.push(`/users/${passingAttributes.username}`)
-      }
-        
-    };
-
-    useEffect(() => {
-      console.log("hello")
-      setEditedAttributes({
-        username: props.name,
-        homerink: props.rink,
-        skilllevel: props.skillLevel
     })
     setViewingAttributes({
       username: props.name,
       homerink: props.rink,
       skilllevel: props.skillLevel
     })
-    }, [props.name, props.rink, props.skillLevel]);
+  }, [props.name, props.rink, props.skillLevel]);
 
     return (
         <Box sx={{
@@ -132,63 +132,63 @@ export default function UserProfile(props: { name: string, rink: string, skillLe
                 )}
             </Stack>
 
-            <Dialog open={open} onClose={handleClose}>
-                <form onSubmit={handleSave}>
-                    <DialogTitle>Edit Profile</DialogTitle>
-                    <DialogContent>
-                    <TextField
-                      autoFocus
-                      margin="dense"
-                      id="username"
-                      label="Username"
-                      fullWidth
-                      value={editedAttributes.username}
-                      onChange={(event) => handleChange(event, 'username')}
-                  />
-                  <TextField
-                      autoFocus
-                      margin="dense"
-                      id="rink"
-                      label="Home Rink"
-                      fullWidth
-                      value={editedAttributes.homerink}
-                      onChange={(event) => handleChange(event, 'homerink')}
-                  />
-                  <TextField
-                      select
-                      label="Skill Level"
-                      fullWidth
-                      margin="dense"
-                      id="skillLevel"
-                      value={editedAttributes.skilllevel}
-                      onChange={(event) => handleChange(event, 'skilllevel')}
-                  >
-                      <MenuItem value="Beginner">Beginner</MenuItem>
-                      <MenuItem value="Intermediate">Intermediate</MenuItem>
-                      <MenuItem value="Advanced">Advanced</MenuItem>
-                  </TextField>
-                    </DialogContent>
-                    <DialogActions>
-                        <Button onClick={handleClose}>Cancel</Button>
-                        <Button type="submit">Save</Button>
-                    </DialogActions>
-                </form>
-            </Dialog>
-            <Dialog open={friendCodeDialogOpen} onClose={handleCloseFriendCodeDialog}>
-                <DialogTitle>Friend Code</DialogTitle>
-                <DialogContent>
-                    <Typography variant="body1">
-                        {/* Display the friend code here */}
-                        {/* Replace 'FriendCodeHere' with the actual friend code */}
-                        Friend Code: {props.friendcode}
-                    </Typography>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleCloseFriendCodeDialog}>Close</Button>
-                    <Button onClick={handleCopyToClipboard}>Copy to Clipboard</Button>
-                </DialogActions>
-            </Dialog>
+      <Dialog open={open} onClose={handleClose}>
+        <form onSubmit={handleSave}>
+          <DialogTitle>Edit Profile</DialogTitle>
+          <DialogContent>
+            <TextField
+              autoFocus
+              margin="dense"
+              id="username"
+              label="Username"
+              fullWidth
+              value={editedAttributes.username}
+              onChange={(event) => handleChange(event, 'username')}
+            />
+            <TextField
+              autoFocus
+              margin="dense"
+              id="rink"
+              label="Home Rink"
+              fullWidth
+              value={editedAttributes.homerink}
+              onChange={(event) => handleChange(event, 'homerink')}
+            />
+            <TextField
+              select
+              label="Skill Level"
+              fullWidth
+              margin="dense"
+              id="skillLevel"
+              value={editedAttributes.skilllevel}
+              onChange={(event) => handleChange(event, 'skilllevel')}
+            >
+              <MenuItem value="Beginner">Beginner</MenuItem>
+              <MenuItem value="Intermediate">Intermediate</MenuItem>
+              <MenuItem value="Advanced">Advanced</MenuItem>
+            </TextField>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleClose}>Cancel</Button>
+            <Button type="submit">Save</Button>
+          </DialogActions>
+        </form>
+      </Dialog>
+      <Dialog open={friendCodeDialogOpen} onClose={handleCloseFriendCodeDialog}>
+        <DialogTitle>Friend Code</DialogTitle>
+        <DialogContent>
+          <Typography variant="body1">
+            {/* Display the friend code here */}
+            {/* Replace 'FriendCodeHere' with the actual friend code */}
+            Friend Code: {props.friendcode}
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseFriendCodeDialog}>Close</Button>
+          <Button onClick={handleCopyToClipboard}>Copy to Clipboard</Button>
+        </DialogActions>
+      </Dialog>
 
-        </Box>
-    );
+    </Box>
+  );
 }
