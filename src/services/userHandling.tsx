@@ -1,4 +1,4 @@
-import { httpRequest, HttpMethod, setBearerToken, HttpResponse } from "./apiRequests";
+import { httpRequest, HttpMethod, setBearerToken, HttpResponse, getBearerToken } from "./apiRequests";
 
 const url = process.env.NEXT_PUBLIC_REACT_APP_API_URL;
 const userUrl = `${url}/users`;
@@ -13,6 +13,10 @@ export async function login(username: string, password: string): Promise<HttpRes
 
 export function logout() {
   setBearerToken("");
+}
+
+export function isLoggedIn(): boolean {
+  return Boolean(getBearerToken());
 }
 
 export async function getInfo(): Promise<HttpResponse> {

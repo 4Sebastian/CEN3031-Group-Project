@@ -64,14 +64,14 @@ export async function verifyToken(req: Request, res: Response, next: NextFunctio
 }
 
 
-export async function getTokenId(req: Request) {
+export async function getTokenId(req: Request): Promise<string> {
   try {
     const authHeader = req.headers['authorization']
     const token = authHeader && authHeader.split(' ')[1]
     const secret = process.env.SECRET as string || "secret";
     var decoded = jwt.verify(token || "", secret);
-    return decrypt((decoded as JwtPayload).id) || "";
+    return decrypt((decoded as JwtPayload).id) || " ";
   } catch (err) {
-    return "";
+    return " ";
   }
 }
