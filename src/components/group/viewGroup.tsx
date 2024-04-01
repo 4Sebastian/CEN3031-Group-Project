@@ -30,6 +30,7 @@ const ViewGroup = (props: { groupId: string, open: boolean, handleClose: () => v
   }
 
   async function getAttendees(id: string) {
+    setAlreadyAttending(false)
     var response = await getEventAttendees(id);
     console.log(response)
     if (response.status == 200) {
@@ -195,7 +196,7 @@ const ViewGroup = (props: { groupId: string, open: boolean, handleClose: () => v
                   Home Rink: {attendee.homerink}
                 </Typography>
                 <Typography variant="body1" gutterBottom>
-                  Recommended Skill Level: {attendee.recommendedskilllevel}
+                  Recommended Skill Level: {attendee.skilllevel}
                 </Typography>
               </Paper>
             ))}

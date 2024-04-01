@@ -2,7 +2,7 @@
 import Image from "next/image";
 import styles from "./page.module.css";
 import { useRouter } from 'next/router';
-import { Box, GlobalStyles, Stack, Typography, darken } from '@mui/material'
+import { Avatar, Box, GlobalStyles, Stack, Typography, darken } from '@mui/material'
 import FriendsList from '@/components/friends';
 import Title from '@/components/title';
 import UserIcon from '@/components/userIcon';
@@ -26,7 +26,11 @@ const darkenedColor50Percent1 = darken('#2534c9', 0.4);
 const NormColor2 = '#6CC9E2'
 const darkenedColor50Percent2 = darken('#5ADBFF', 0.5);
 
-
+const images = ['/components/Profile_Icons/formation_1862969.png', '/components/Profile_Icons/goal_1412940.png','/components/Profile_Icons/goalie_3294751.png',
+    '/components/Profile_Icons/hockey_991032.png','/components/Profile_Icons/hockey_2510130.png','/components/Profile_Icons/hockey_5222537.png',
+    '/components/Profile_Icons/hockey-player_2379114.png','/components/Profile_Icons/hockey-stick_3798795.png','/components/Profile_Icons/ice_13257450.png',
+    '/components/Profile_Icons/ice-hockey_4357573.png','/components/Profile_Icons/ice-hockey_4357794.png','/components/Profile_Icons/ice-hockey_15184417.png',
+    '/components/Profile_Icons/puck_4242141.png']
 
 
 export default function Home() {
@@ -35,7 +39,8 @@ export default function Home() {
   const [activeComponent, setActiveComponent] = useState('home');
   let [userCreated, setUserCreated] = useState(false);
   let [shouldCheckUser, setCheckUser] = useState(false);
-
+  const[imagepath, setImagePath] = useState<any>();
+  const[backgroundcolor, setBckgorundColor] = useState<any>();
   function checkUser() {
     setCheckUser(!shouldCheckUser);
   }
@@ -64,6 +69,13 @@ export default function Home() {
             setUserName(response.data.username);
             setUserCreated(true);
             saveUserData(response.data);
+            const hashCode = response.data.friendcode.split('').reduce((acc: any, char: string) => {
+              return acc + char.charCodeAt(0);
+            }, 0);
+            const selectedImagePath = images[hashCode % images.length];
+            const backgroundColor = '#' + hashCode.toString(16).slice(0, 6);
+            setImagePath(selectedImagePath)
+            setBckgorundColor(backgroundColor)
           } else {
             setUserCreated(false);
             console.error('Failed to fetch user information');
@@ -74,6 +86,9 @@ export default function Home() {
           setUserName('')
           setUserCreated(false)
           saveUserData({});
+          setImagePath("")
+            setBckgorundColor("")
+          
         }
       } catch (error) {
         console.error('Error while fetching user information:', error);
@@ -149,7 +164,7 @@ export default function Home() {
                 <Title />
                 <Stack direction="row" spacing={2}> {/* Adjust the spacing between LogButton and UserIcon */}
                   <LogButton loggedIn={userCreated} setCheckUser={setCheckUser} />
-                  <UserIcon userName={userName} onclick={handleUserIconClick} />
+                  <UserIcon userName={userName} onclick={handleUserIconClick} imagePath={imagepath} backgroundColor={backgroundcolor}/>
                 </Stack>
               </Stack>
 

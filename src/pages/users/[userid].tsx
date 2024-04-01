@@ -24,7 +24,12 @@ const NormColor2 = '#F24333';
 const darkenedColor50Percent2 = darken('#5ADBFF', 0.5);
 
 const bannerImageUrl = '/components/night.png';
-const profileImageUrl = 'https://osu.ppy.sh/assets/images/avatar-guest.8a2df920.png';
+
+const images = ['/components/Profile_Icons/formation_1862969.png', '/components/Profile_Icons/goal_1412940.png','/components/Profile_Icons/goalie_3294751.png',
+    '/components/Profile_Icons/hockey_991032.png','/components/Profile_Icons/hockey_2510130.png','/components/Profile_Icons/hockey_5222537.png',
+    '/components/Profile_Icons/hockey-player_2379114.png','/components/Profile_Icons/hockey-stick_3798795.png','/components/Profile_Icons/ice_13257450.png',
+    '/components/Profile_Icons/ice-hockey_4357573.png','/components/Profile_Icons/ice-hockey_4357794.png','/components/Profile_Icons/ice-hockey_15184417.png',
+    '/components/Profile_Icons/puck_4242141.png',]
 
 
 const UserPage = () => {
@@ -34,6 +39,10 @@ const UserPage = () => {
   const[skilllevel, setSkillLevel] = useState('')
   const[iceRink, setIceRink] = useState('')
   const[currentUser, setCurrentUser] = useState('')
+  const[imagepath, setImagePath] = useState<any>();
+  const[backgroundcolor, setBckgorundColor] = useState<any>();
+  const[imagepathIcon, setImagePathIcon] = useState<any>();
+  const[backgroundcolorIcon, setBackgorundColorIcon] = useState<any>();
   const [userInfo, setUserInfo] = useState<any>({
     username: 'User'
   });
@@ -61,21 +70,42 @@ const UserPage = () => {
           if (response.status === 200) {
             setAttributes(response.data)
             setUserInfo(response.data);
-            console.log(userInfo.username);
-            console.log(userid)
+            const hashCode = response.data.friendcode.split('').reduce((acc: any, char: string) => {
+              return acc + char.charCodeAt(0);
+            }, 0);
+            console.log(hashCode)
+            const selectedImagePath = images[hashCode % images.length];
+            const backgroundColor = '#' + hashCode.toString(16).slice(0, 6);
+            setImagePath(selectedImagePath)
+            setBckgorundColor(backgroundColor)
+            setImagePathIcon(selectedImagePath)
+            setBackgorundColorIcon(backgroundColor)
           } else {
             console.error('Failed to fetch user information');
           }
         }
         else{
+          const hashCode = response.data.friendcode.split('').reduce((acc: any, char: string) => {
+            return acc + char.charCodeAt(0);
+          }, 0);
+          console.log(hashCode)
+          const selectedImagePath = images[hashCode % images.length];
+          const backgroundColor = '#' + hashCode.toString(16).slice(0, 6);
+          setImagePathIcon(selectedImagePath)
+          setBackgorundColorIcon(backgroundColor)
           setLoggedInUser(false)
           console.log(userid)
           if (typeof userid === 'string') {
             const response = await getFriendInfo(userid);
             setUserInfo(response.data);
             setAttributes(response.data)
-            console.log(response)
-            console.log(userInfo.username);
+            const hashCode = response.data.friendcode.split('').reduce((acc: any, char: string) => {
+              return acc + char.charCodeAt(0);
+            }, 0);
+            const selectedImagePath = images[hashCode % images.length];
+            const backgroundColor = '#' + hashCode.toString(16).slice(0, 6);
+            setImagePath(selectedImagePath)
+            setBckgorundColor(backgroundColor)
           }
           else{
             console.error('User ID is not a valid string:', userid);
@@ -163,11 +193,11 @@ const UserPage = () => {
           {/* Title Stack */}
           <Stack direction="row" sx={{ height: 'min-content', justifyContent: 'space-between', padding: 3, position: 'relative', zIndex: 2 }}>
             <Title />
-            <UserIcon onclick={handleUserIconClick} userName={currentUser} />
+            <UserIcon onclick={handleUserIconClick} userName={currentUser} imagePath={imagepathIcon} backgroundColor={backgroundcolorIcon}/>
           </Stack>
           {/* FriendsList Stack */}
           <Stack direction="row" sx={{ height: 1, justifyContent: 'space-between', padding: 3, position: 'relative', zIndex: 2 }}>
-            <UserProfile rink={iceRink} name={userid as string} skillLevel={skilllevel} imageUrl={profileImageUrl} editButton = {isLoggedInUser} friendcode = {userInfo.friendcode}/>
+            <UserProfile rink={iceRink} name={userid as string} skillLevel={skilllevel} imageUrl={imagepath} backgroundColor={backgroundcolor} editButton = {isLoggedInUser} friendcode = {userInfo.friendcode}/>
             <CurrentGroupsList />
             <PastGroupsList />
           </Stack>

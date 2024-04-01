@@ -43,10 +43,10 @@ export default function GroupsList(props: { shouldCheckUser: boolean }) {
   const handleClose = () => {
     setOpen(false);
   };
-  async function getEvents(eventType: string = 'Public') {
+  async function getEvents(eType: string = 'None') {
     if (isLoggedIn()) {
       var response: HttpResponse = { data: [], status: 500, statusText: 'Internal Server Error' };
-      switch (eventType) {
+      switch (eType == 'None' ? eventType : eType) {
         case 'Public':
           response = await getPublicEvents();
           break;

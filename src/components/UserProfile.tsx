@@ -3,10 +3,17 @@ import { Avatar, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle,
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 
-export default function UserProfile(props: { name: string, rink: string, skillLevel: string, imageUrl: string, editButton: boolean, friendcode: string }) {
+export default function UserProfile(props: { name: string, rink: string, skillLevel: string, imageUrl: string, backgroundColor:any,  editButton: boolean, friendcode: string }) {
     const [open, setOpen] = useState(false);
     const [friendCodeDialogOpen, setFriendCodeDialogOpen] = useState(false);
     const router = useRouter();
+
+    const images = ['/components/Profile_Icons/formation_1862969.png', '/components/Profile_Icons/goal_1412940.png','/components/Profile_Icons/goalie_3294751.png',
+    '/components/Profile_Icons/hockey_991032.png','/components/Profile_Icons/hockey_2510130.png','/components/Profile_Icons/hockey_5222537.png',
+    '/components/Profile_Icons/hockey-player_2379114.png','/components/Profile_Icons/hockey-stick_3798795.png','/components/Profile_Icons/ice_13257450.png',
+    '/components/Profile_Icons/ice-hockey_4357573.png','/components/Profile_Icons/ice-hockey_4357794.png','/components/Profile_Icons/ice-hockey_15184417.png',
+    '/components/Profile_Icons/puck_4242141.png',]
+
     let defaultRink = props.rink === 'Not Set' ? '' : props.rink;
     let defaultSkill = props.skillLevel === 'Not Set' ? '' : props.skillLevel;
     const [editedAttributes, setEditedAttributes] = useState({
@@ -106,7 +113,7 @@ export default function UserProfile(props: { name: string, rink: string, skillLe
         }}
         >
             <Stack direction="column" justifyContent="center" alignItems="center" spacing={2} sx={{ padding: 2 }}>
-                <Avatar alt={props.name} src={props.imageUrl} sx={{ width: 240, height: 240, borderRadius: '15px' }} />
+                <Avatar alt={props.name} src={props.imageUrl} sx={{ width: 240, height: 240, borderRadius: '15px', bgcolor: props.backgroundColor }} />
                 <Typography variant="h3" color="black">
                     {viewingAttributes.username}
                 </Typography>
