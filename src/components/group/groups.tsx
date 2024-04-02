@@ -1,20 +1,25 @@
 
 "use client";
-import { getPersonalEvents, getPrivateEvents, getPublicEvents } from '@/services/eventHandling';
+import { getEventAttendees, getPersonalEvents, getPrivateEvents, getPublicEvents } from '@/services/eventHandling';
 import { isLoggedIn } from '@/services/userHandling';
 import { Box, Stack, Typography, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, MenuItem, ButtonGroup } from '@mui/material';
 import { useEffect, useState } from 'react';
 import CreateGroup from './createGroup';
 import ViewGroup from './viewGroup';
 import { HttpResponse } from '@/services/apiRequests';
+import { useRouter } from 'next/router';
+import { getFriendInfo } from '@/services/friendHandling';
 
-export default function GroupsList(props: { shouldCheckUser: boolean, title?: string, moment?: Date, timeDirectionForward?: boolean, thinner?: boolean, noCreate?: boolean }) {
+export default function GroupsList(props: { shouldCheckUser: boolean, title?: string, moment?: Date, timeDirectionForward?: boolean, thinner?: boolean, noCreate?: boolean, friendMode?: boolean }) {
   const [eventsData, setEventsData] = useState<any[]>([]);
   const [eventType, setEventType] = useState<'Public' | 'Private' | 'Personal'>('Public');
   const [selectedGroup, setSelectedGroup] = useState<string>();
   const [open, setOpen] = useState(false);
   const [groupOpen, setGroupOpen] = useState(false);
   const [selectedButton, setSelectedButton] = useState('Public');
+  const router = useRouter();
+  const { userid } = router.query;
+  const [attendEvents, setAttendEvents] = useState<string[]>([]);
 
   const handleButtonClick = (value: 'Public' | 'Private' | 'Personal') => {
     setSelectedButton(value);
@@ -44,10 +49,15 @@ export default function GroupsList(props: { shouldCheckUser: boolean, title?: st
     setOpen(false);
   };
 
-  const handleData = (data: any) => {
+  const handleData = (data: any, allAttendingEvents: string[]) => {
     if (props.moment) {
       var filteredData = data.filter((event: any) => {
         var date = new Date(event.datetime);
+        if (props.friendMode) {
+          if (!allAttendingEvents.includes(event.id)) {
+            return false;
+          }
+        }
         if (props.moment) {
           if (props.timeDirectionForward) {
             return date.valueOf() >= props.moment?.valueOf();
@@ -62,10 +72,34 @@ export default function GroupsList(props: { shouldCheckUser: boolean, title?: st
     }
   }
 
-  async function getEvents(eventType: string = 'Public') {
+  async function handleFriend(data: any[]): Promise<string[]> {
+    if (props.friendMode) {
+      const response = await getFriendInfo(userid as string);
+      console.log(response)
+      if (response.status === 200) {
+        var allEvents: string[] = [];
+        for (const event of data) {
+          var res = await getEventAttendees(event.id);
+          if (res.status === 200) {
+            for (const attendee of res.data) {
+              if (attendee.friendcode == response.data.friendcode) {
+                allEvents.push(event.id as string);
+              }
+            }
+          }
+        }
+        console.log(allEvents)
+        setAttendEvents(allEvents);
+        return allEvents;
+      }
+    }
+    return [];
+  }
+
+  async function getEvents(eType: string = 'None') {
     if (isLoggedIn()) {
       var response: HttpResponse = { data: [], status: 500, statusText: 'Internal Server Error' };
-      switch (eventType) {
+      switch (eType == 'None' ? eventType : eType) {
         case 'Public':
           response = await getPublicEvents();
           break;
@@ -78,7 +112,8 @@ export default function GroupsList(props: { shouldCheckUser: boolean, title?: st
       }
       console.log(response)
       if (response.status === 200) {
-        var data = handleData(response.data);
+        var allAttendingEvents = await handleFriend(response.data);
+        var data = handleData(response.data, allAttendingEvents);
         setEventsData(data);
       } else {
         setEventsData([]);
@@ -132,12 +167,12 @@ export default function GroupsList(props: { shouldCheckUser: boolean, title?: st
             >
               Private
             </Button>
-            <Button
+            {!props.friendMode && <Button
               variant={selectedButton === 'Personal' ? 'contained' : 'outlined'}
               onClick={() => handleButtonClick('Personal')}
             >
               Personal
-            </Button>
+            </Button>}
           </ButtonGroup>
 
         </Stack>

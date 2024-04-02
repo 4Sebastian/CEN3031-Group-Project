@@ -15,47 +15,6 @@ const eventsData = [
 export default function PastGroupsList() {
   const currentDate: Date = new Date(Date.now());
   return (
-    <GroupsList shouldCheckUser={false} title="Past Events" timeDirectionForward={false} moment={currentDate} thinner={true} noCreate={true} />
+    <GroupsList shouldCheckUser={false} title="Past Events" timeDirectionForward={false} moment={currentDate} thinner={true} noCreate={true} friendMode={true} />
   )
-  // return (
-  //   <Box sx={{
-  //     width: 0.33,
-  //     height: '80vh', // Adjust the height as needed
-  //     backgroundColor: 'rgba(128, 128, 128, 0.75)',
-  //     borderRadius: '15px',
-  //     transition: 'box-shadow 0.1s ease',
-  //     '&:hover': {
-  //       boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.3)',
-  //     },
-  //   }}
-  //   >
-  //     <Stack direction="column" justifyContent="center" alignItems="center" sx={{ padding: 2 }}>
-  //       <Typography variant="h5" color="black" sx={{ marginBottom: 2 }}>
-  //         Past Events
-  //       </Typography>
-  //       {eventsData.map((event, index) => (
-  //         <Box key={index} sx={{
-  //           backgroundColor: 'lightblue',
-  //           borderRadius: '8px',
-  //           width: '90%',
-  //           padding: '12px',
-  //           marginBottom: '16px',
-  //           transition: 'transform 0.3s ease',
-  //           '&:hover': {
-  //             transform: 'scale(1.03)',
-  //           },
-  //           display: 'flex',
-  //           justifyContent: 'space-between',
-  //           alignItems: 'center',
-  //         }}
-  //         >
-  //           <Typography color="black" variant="h6">{event}</Typography>
-  //           <Button variant="contained" color="primary">
-  //             Join
-  //           </Button>
-  //         </Box>
-  //       ))}
-  //     </Stack>
-  //   </Box>
-  // );
 }
