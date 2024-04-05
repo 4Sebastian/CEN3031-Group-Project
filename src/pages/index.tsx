@@ -41,6 +41,8 @@ export default function Home() {
   let [shouldCheckUser, setCheckUser] = useState(false);
   const[imagepath, setImagePath] = useState<any>();
   const[backgroundcolor, setBckgorundColor] = useState<any>();
+  
+  const currentDate: Date = new Date(Date.now());
   function checkUser() {
     setCheckUser(!shouldCheckUser);
   }
@@ -171,7 +173,7 @@ export default function Home() {
               {/* FriendsList Stack */}
               <Stack direction="row" sx={{ height: 1, justifyContent: 'space-between', padding: 3, position: 'relative', zIndex: 2 }}>
                 <FriendsList checkUser={userName} />
-                <GroupsList shouldCheckUser={shouldCheckUser} />
+                <GroupsList shouldCheckUser={shouldCheckUser} timeDirectionForward={true} moment={currentDate} />
                 <PuckDial />
               </Stack>
             </Stack>
